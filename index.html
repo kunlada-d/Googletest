@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สอบกลางภาค: คอมพิวเตอร์ Google for Education</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap" rel="stylesheet">
+    <style>
+        body {  font-family: "Google Sans", sans-serif; background-color: #f0f4f9; }
+        .google-blue { color: #00775d; }
+        .bg-google-blue { background-color: #00775d; }
+        .bg-google-blue:hover { background-color: #00775d; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // ฐานข้อมูลข้อสอบปรนัย (30 ข้อ)
+        const mcqPool = [
+            // Gmail
+            { id: 1, q: "ข้อใดคือสัญลักษณ์ของการแนบไฟล์ใน Gmail?", options: ["คลิปหนีบกระดาษ", "รูปฟันเฟือง", "รูปแว่นขยาย", "รูปซองจดหมาย"], answer: 0 },
+            { id: 2, q: "ช่อง BCC ในการส่งอีเมลมีไว้เพื่อจุดประสงค์ใด?", options: ["ส่งถึงผู้รับหลัก", "ส่งสำเนาโดยให้ทุกคนเห็นอีเมลกัน", "ส่งสำเนาซ่อนไม่ให้ผู้รับคนอื่นเห็นอีเมล", "ตั้งชื่อเรื่องอีเมล"], answer: 2 },
+            { id: 3, q: "ขนาดไฟล์สูงสุดที่ Gmail อนุญาตให้แนบโดยตรงคือเท่าใด?", options: ["10 MB", "15 MB", "25 MB", "50 MB"], answer: 2 },
+            { id: 4, q: "การสร้างลายเซ็น (Signature) ท้ายอีเมลอัตโนมัติ ต้องไปที่เมนูใด?", options: ["ถาดจดหมายออก", "การตั้งค่า (Settings)", "ร่างจดหมาย", "ติดดาว"], answer: 1 },
+            { id: 5, q: "หากส่งอีเมลผิดพลาด ฟีเจอร์ 'เลิกทำ' (Undo Send) มีเวลาให้กดยกเลิกได้สูงสุดกี่วินาที (ตามค่าเริ่มต้น)?", options: ["5 วินาที", "10 วินาที", "30 วินาที", "1 นาที"], answer: 2 },
+            // Calendar
+            { id: 6, q: "ข้อใดคือประโยชน์หลักของ Google Calendar?", options: ["พิมพ์เอกสารรายงาน", "จัดการตารางเวลาและนัดหมาย", "คำนวณรายรับรายจ่าย", "ตัดต่อวิดีโอ"], answer: 1 },
+            { id: 7, q: "หากต้องการประชุมออนไลน์ผ่าน Google Calendar ต้องเพิ่มสิ่งใดในกิจกรรม?", options: ["Google Drive", "Google Maps", "Google Meet", "Google Chat"], answer: 2 },
+            { id: 8, q: "เราสามารถตั้งค่าการสร้างกิจกรรม 'ซ้ำ' (Repeat) แบบใดได้บ้าง?", options: ["ทุกวัน", "ทุกสัปดาห์", "ทุกเดือน", "ถูกทุกข้อ"], answer: 3 },
+            { id: 9, q: "การเชิญบุคคลอื่นเข้าร่วมกิจกรรมในปฏิทิน ต้องใช้ข้อมูลใดของผู้รับ?", options: ["เบอร์โทรศัพท์", "ที่อยู่อีเมล", "รหัสบัตรประชาชน", "ชื่อ Facebook"], answer: 1 },
+            { id: 10, q: "สามารถแชร์ปฏิทินของตนเองให้บุคคลอื่นดูได้หรือไม่?", options: ["ได้ โดยตั้งค่าสิทธิ์การแชร์", "ได้ แต่ต้องส่งเป็นไฟล์ PDF เท่านั้น", "ไม่ได้ ถือเป็นข้อมูลส่วนตัว", "ไม่ได้ ระบบไม่รองรับ"], answer: 0 },
+            // Docs
+            { id: 11, q: "ข้อใดคือความสามารถเด่นของ Google Docs เมื่อเทียบกับโปรแกรมออฟไลน์ทั่วไป?", options: ["มีฟอนต์ให้เลือกเยอะกว่า", "ทำงานร่วมกันได้หลายคนแบบเรียลไทม์", "พิมพ์งานได้เร็วกว่า", "ไม่ต้องใช้แป้นพิมพ์"], answer: 1 },
+            { id: 12, q: "หากต้องการดูประวัติว่าใครแก้ไขเอกสารจุดใดบ้าง ต้องไปที่เมนูใด?", options: ["ไฟล์ > ประวัติเวอร์ชัน", "แก้ไข > ค้นหาและแทนที่", "แทรก > ความคิดเห็น", "เครื่องมือ > จำนวนคำ"], answer: 0 },
+            { id: 13, q: "การแชร์เอกสารด้วยสิทธิ์ 'ผู้มีสิทธิ์อ่าน' (Viewer) ผู้รับสามารถทำอะไรได้บ้าง?", options: ["ดูและพิมพ์ข้อความเพิ่มได้", "ดู ดาวน์โหลด และพิมพ์เอกสารได้", "ลบเอกสารทิ้งได้", "แชร์เอกสารต่อให้คนอื่นเป็น Editor ได้"], answer: 1 },
+            { id: 14, q: "หากต้องการดาวน์โหลด Google Docs ไปแก้ไขต่อใน Microsoft Word ต้องเลือกนามสกุลไฟล์ใด?", options: [".pdf", ".txt", ".docx", ".csv"], answer: 2 },
+            { id: 15, q: "การพิมพ์ด้วยเสียง (Voice Typing) ใน Google Docs อยู่ในเมนูใด?", options: ["ไฟล์", "แก้ไข", "รูปแบบ", "เครื่องมือ"], answer: 3 },
+            // Contacts
+            { id: 16, q: "Google Contacts ใช้สำหรับทำสิ่งใดเป็นหลัก?", options: ["แชทพูดคุย", "บันทึกและจัดการรายชื่อผู้ติดต่อ", "ส่งไฟล์ขนาดใหญ่", "สร้างแบบสอบถาม"], answer: 1 },
+            { id: 17, q: "การจัดกลุ่มรายชื่อ (เช่น กลุ่มเพื่อน, กลุ่มครอบครัว) ใน Contacts ใช้เครื่องมือใด?", options: ["แฟ้ม", "ป้ายกำกับ (Label)", "กล่องจดหมาย", "ติดดาว"], answer: 1 },
+            { id: 18, q: "ข้อดีของการบันทึกเบอร์โทรศัพท์ลงใน Google Contacts คืออะไร?", options: ["โทรฟรีไม่เสียค่าบริการ", "รายชื่อไม่สูญหายเมื่อเปลี่ยนโทรศัพท์ใหม่ (ซิงค์กับบัญชี)", "เปลี่ยนเสียงรอสายได้", "ป้องกันแก๊งคอลเซ็นเตอร์ได้"], answer: 1 },
+            { id: 19, q: "ไฟล์ประเภทใดที่นิยมใช้ในการ นำเข้า/ส่งออก (Import/Export) รายชื่อ?", options: [".docx", ".pptx", ".csv", ".mp4"], answer: 2 },
+            { id: 20, q: "นอกจากชื่อและเบอร์โทรแล้ว เราสามารถใส่ข้อมูลใดใน Contacts ได้อีก?", options: ["อีเมล", "วันเกิด", "สถานที่ทำงาน", "ถูกทุกข้อ"], answer: 3 },
+            // Drive
+            { id: 21, q: "บัญชี Google ทั่วไป ให้พื้นที่จัดเก็บข้อมูลใน Google Drive ฟรีเท่าใด?", options: ["5 GB", "15 GB", "50 GB", "100 GB"], answer: 1 },
+            { id: 22, q: "ไฟล์หรือโฟลเดอร์ที่ถูกลบ จะถูกเก็บไว้ใน 'ถังขยะ' เป็นเวลากี่วันก่อนถูกลบถาวร?", options: ["7 วัน", "15 วัน", "30 วัน", "60 วัน"], answer: 2 },
+            { id: 23, q: "การตั้งค่าแชร์แบบ 'ทุกคนที่มีลิงก์' (Anyone with the link) หมายความว่าอย่างไร?", options: ["ใครก็ตามที่มีลิงก์จะสามารถเข้าถึงไฟล์ได้ตามสิทธิ์ที่ให้ไว้", "เฉพาะคนที่มีรหัสผ่านเท่านั้น", "เฉพาะคนในครอบครัว", "ทุกคนในโลกอินเทอร์เน็ตแม้ไม่มีลิงก์"], answer: 0 },
+            { id: 24, q: "ข้อใด ไม่ใช่ แอปพลิเคชันที่อยู่ในระบบนิเวศของ Google Drive?", options: ["Google Docs", "Google Sheets", "Google Slides", "Microsoft Excel"], answer: 3 },
+            { id: 25, q: "สัญลักษณ์รูปดาว ใน Google Drive มีความหมายว่าอย่างไร?", options: ["ไฟล์ที่มีไวรัส", "ไฟล์สำคัญหรือไฟล์ที่ใช้งานบ่อย", "ไฟล์ที่แชร์ให้คนอื่น", "ไฟล์ที่กำลังดาวน์โหลด"], answer: 1 },
+            // Slides
+            { id: 26, q: "Google Slides เหมาะสำหรับการทำงานประเภทใด?", options: ["พิมพ์รายงาน", "สร้างตารางคำนวณ", "สร้างงานนำเสนอ (Presentation)", "ตัดต่อภาพ"], answer: 2 },
+            { id: 27, q: "การกำหนดเอฟเฟกต์การเปลี่ยนหน้าสไลด์แต่ละหน้า เรียกว่าอะไร?", options: ["Animation", "Transition (การเปลี่ยน)", "Layout", "Theme"], answer: 1 },
+            { id: 28, q: "เมนูใดใช้สำหรับเปลี่ยนรูปแบบหน้าตาโดยรวมของสไลด์ให้สวยงามอย่างรวดเร็ว?", options: ["ธีม (Theme)", "เลย์เอาต์ (Layout)", "พื้นหลัง (Background)", "รูปร่าง (Shape)"], answer: 0 },
+            { id: 29, q: "ฟีเจอร์ ถาม-ตอบ (Q&A) ใน Google Slides มีประโยชน์อย่างไร?", options: ["ใช้ทำข้อสอบหลังเรียน", "ให้ผู้ชมพิมพ์ส่งคำถามมายังผู้นำเสนอได้แบบเรียลไทม์", "ใช้แปลภาษา", "ใช้สรุปเนื้อหาสไลด์"], answer: 1 },
+            { id: 30, q: "การนำเสนอสไลด์สามารถเชื่อมต่อเพื่อนำเสนอในแอปพลิเคชันใดได้โดยตรง?", options: ["Google Maps", "Google Meet", "Google Photos", "Google Translate"], answer: 1 }
+        ];
+
+        // ฐานข้อมูลข้อสอบอัตนัย (5 ข้อ)
+        const subjectivePool = [
+            "1. จงอธิบายความแตกต่างระหว่างการแชร์ไฟล์แบบ ผู้มีสิทธิ์อ่าน (Viewer), ผู้แสดงความคิดเห็น (Commenter) และ เอดิเตอร์ (Editor) ใน Google Drive",
+            "2. ให้อธิบายขั้นตอนการสร้างนัดหมายการประชุมกลุ่มใน Google Calendar และวิธีการเชิญเพื่อนเข้าร่วมประชุม",
+            "3. Google Contacts มีประโยชน์อย่างไรต่อการส่งอีเมล (Gmail) ไปหาเพื่อนทั้งห้อง 40 คน?",
+            "4. หากนักเรียนเผลอลบไฟล์รายงานสำคัญใน Google Drive ทิ้งไป นักเรียนจะมีวิธีกู้คืนไฟล์นั้นได้อย่างไร อธิบายเป็นขั้นตอน",
+            "5. ให้นักเรียนยกตัวอย่างสถานการณ์การทำงานกลุ่ม 1 สถานการณ์ ที่สามารถนำ Google Docs ไปประยุกต์ใช้ให้เกิดประโยชน์สูงสุด"
+        ];
+
+        // ฐานข้อมูลข้อสอบปฏิบัติ (20 ชุด) ที่มีความซับซ้อนและเงื่อนไขมากขึ้น
+        const practicalPool = [
+            "ชุดที่ 1: [Google Drive & Docs] ให้สร้างโฟลเดอร์ใน Drive ชื่อ 'Final_Project_ชื่อนักเรียน' ภายในให้สร้างเอกสาร Docs 1 ไฟล์ ตั้งหน้ากระดาษเป็นแนวนอน (Landscape) แทรกตารางขนาด 3x4 และแทรกรูปภาพประกอบ 1 รูป จากนั้นตั้งค่าแชร์โฟลเดอร์หลักให้ 'ทุกคนที่มีลิงก์' เป็น 'ผู้มีสิทธิ์อ่าน' แล้วนำลิงก์โฟลเดอร์มาส่ง",
+            "ชุดที่ 2: [Google Slides & Calendar] ให้สร้างสไลด์ 5 หน้า แนะนำสถานที่ท่องเที่ยว ใส่ Transition ทุกหน้า จากนั้นสร้างกิจกรรมใน Calendar นัดหมายนำเสนองานวันศุกร์หน้า เวลา 10:00 น. และแนบไฟล์สไลด์นี้เข้าไปในกิจกรรม คัดลอกลิงก์ของไฟล์สไลด์ (ตั้งค่าเป็น Viewer) มาส่ง",
+            "ชุดที่ 3: [Google Docs ขั้นสูง] ให้สร้างเอกสาร Docs เพื่อทำจดหมายข่าว (Newsletter) โดยต้องมีการตั้งค่าเนื้อหาเป็น 2 คอลัมน์ แทรกรูปภาพพร้อมตั้งค่าการตัดข้อความ (Text Wrapping) ให้ข้อความล้อมรอบรูป และใส่ลายน้ำ (Watermark) เป็นชื่อตนเอง นำลิงก์มาส่ง",
+            "ชุดที่ 4: [Google Calendar & Meet] ให้สร้างนัดหมายการประชุมกลุ่มซ้ำ (Recurring event) ทุกวันจันทร์ เวลา 13.00-14.00 น. เป็นเวลา 4 สัปดาห์ เพิ่มลิงก์ Google Meet และใส่กำหนดการประชุมในช่องคำอธิบาย นำลิงก์เข้าร่วม Meet หรือลิงก์กิจกรรมมาส่ง",
+            "ชุดที่ 5: [Google Docs การอ้างอิง] ให้พิมพ์สรุปความรู้เรื่อง AI ความยาว 1 หน้ากระดาษ โดยใช้เครื่องมือ 'การสำรวจ (Explore)' หรือ 'การอ้างอิง (Citations)' เพื่อแทรกเชิงอรรถ (Footnote) อ้างอิงแหล่งที่มาอย่างน้อย 2 แหล่ง ตั้งค่าแชร์เป็น 'ผู้แสดงความคิดเห็น (Commenter)' แล้วนำลิงก์มาส่ง",
+            "ชุดที่ 6: [Google Slides Interactive] ให้สร้างงานนำเสนอ 3 หน้า หน้าแรกทำเป็นเมนู (สารบัญ) ที่มีการสร้างไฮเปอร์ลิงก์ (Hyperlink) กดแล้วกระโดดไปหน้า 2 และหน้า 3 ได้ หน้าที่ 2 ให้แทรกวิดีโอจาก YouTube 1 คลิป ตั้งค่าแชร์ให้ทุกคนดูได้ แล้วนำลิงก์มาส่ง",
+            "ชุดที่ 7: [Google Drive การจัดการสิทธิ์] สร้างโฟลเดอร์ชื่อ 'M6_Data' ภายในสร้าง 2 โฟลเดอร์ย่อยคือ 'Public' และ 'Private' สร้างไฟล์ Docs ในทั้งสองโฟลเดอร์ย่อย ตั้งค่าแชร์โฟลเดอร์ 'Public' ให้ทุกคนเป็น Viewer และโฟลเดอร์ 'Private' ห้ามแชร์ให้ใคร ส่งลิงก์โฟลเดอร์หลัก 'M6_Data'",
+            "ชุดที่ 8: [Google Docs Collaboration] ให้สร้างเอกสาร Docs พิมพ์บทความสั้นๆ 1 ย่อหน้า จากนั้นใช้โหมด 'การแนะนำ (Suggesting)' ในการแก้ไขคำผิดหรือเพิ่มข้อความ 2 จุด และเพิ่ม 'ความคิดเห็น (Comment)' เจาะจงที่ประโยค 1 จุด ตั้งค่าแชร์เป็น 'เอดิเตอร์ (Editor)' แล้วส่งลิงก์",
+            "ชุดที่ 9: [Google Slides Master] ให้เปิดงานนำเสนอใหม่ เข้าไปแก้ 'เครื่องมือสร้างธีม (Theme Builder / Master Slide)' โดยแทรกรูปดาวหรือโลโก้เล็กๆ ไว้ที่มุมขวาบน เพื่อให้แสดงในทุกสไลด์อัตโนมัติ สร้างสไลด์ 3 หน้าเพื่อทดสอบ ส่งลิงก์แบบ 'ผู้มีสิทธิ์อ่าน'",
+            "ชุดที่ 10: [Google Docs เสียงและแปลภาษา] ให้สร้างไฟล์ Docs พิมพ์ข้อมูลด้วยการใช้เครื่องมือ 'พิมพ์ด้วยเสียง (Voice Typing)' เป็นภาษาไทยอย่างน้อย 3 บรรทัด จากนั้นใช้เครื่องมือ 'แปลเอกสาร (Translate document)' เป็นภาษาอังกฤษ ส่งลิงก์ไฟล์ที่ถูกแปลแล้วมาให้ครู",
+            "ชุดที่ 11: [Google Contacts & Sheets] จำลองการเตรียมข้อมูลผู้ติดต่อ ให้สร้างไฟล์ Google Sheets สร้างคอลัมน์ First Name, Last Name, Email, Phone Number กรอกข้อมูลเพื่อนสมมติ 5 คน (ตั้งค่าเซลล์เบอร์โทรไม่ให้เลข 0 หาย) ส่งลิงก์แบบ 'ผู้มีสิทธิ์อ่าน'",
+            "ชุดที่ 12: [Google Calendar ตั้งเวลา] สร้างกิจกรรมในปฏิทินของวันพรุ่งนี้ เวลา 15.00-16.00 น. ระบุสถานที่ (Location) เป็น 'ห้องคอมพิวเตอร์' และตั้งค่าการแจ้งเตือน (Notification) ล่วงหน้า 2 ครั้ง คือ 1 วัน และ 30 นาที คัดลอกลิงก์แชร์กิจกรรมมาส่ง",
+            "ชุดที่ 13: [Google Drive ทางลัด] สร้างไฟล์ Google Docs ชื่อ 'Original_Doc' ไว้ในโฟลเดอร์หลัก จากนั้นสร้างโฟลเดอร์ใหม่ชื่อ 'Shortcut_Folder' แล้วสร้าง 'ทางลัด (Shortcut)' ของไฟล์ Original_Doc ไปไว้ในโฟลเดอร์นั้น ส่งลิงก์ Shortcut_Folder แบบ Viewer",
+            "ชุดที่ 14: [Google Slides Q&A] สร้างสไลด์เนื้อหา 3 หน้า เกี่ยวกับ 'ภาวะโลกร้อน' ให้เปิดใช้งานฟีเจอร์ 'เครื่องมือสำหรับผู้ชม (Audience Tools) -> Q&A' เพื่อรับคำถาม คัดลอกลิงก์สไลด์แบบ 'เอดิเตอร์' เพื่อให้ครูเข้าไปดูหน้าต่าง Q&A ได้",
+            "ชุดที่ 15: [Gmail Settings - ภาพถ่าย] เนื่องจากส่งลิงก์ Gmail ไม่ได้ ให้สร้างเอกสาร Docs แทรกภาพหน้าจอ (Screenshot) 2 ภาพ: 1) ภาพการตั้งค่าลายเซ็น (Signature) ท้ายอีเมลของตนเอง 2) ภาพการสร้างป้ายกำกับ (Label) แยกหมวดหมู่อีเมล ส่งลิงก์ไฟล์ Docs นี้",
+            "ชุดที่ 16: [Google Docs ประวัติ] สร้างไฟล์ Docs พิมพ์ชื่อ-สกุลตนเอง จากนั้นแก้ไขสีข้อความและฟอนต์ 3 ครั้ง (เว้นระยะเวลาเล็กน้อย) ไปที่เมนู 'ประวัติเวอร์ชัน (Version history)' ตั้งชื่อเวอร์ชันสุดท้ายว่า 'Final_Version' ส่งลิงก์เอกสารให้ครูเป็น 'เอดิเตอร์'",
+            "ชุดที่ 17: [Google Calendar Notes] เปิด Google Calendar สร้างนัดหมายชื่อ 'ประชุมโครงงาน' ในสัปดาห์หน้า จากนั้นกดปุ่ม 'สร้างบันทึกการประชุม (Create meeting notes)' ระบบจะสร้างไฟล์ Docs ให้อัตโนมัติ ให้เข้าไปพิมพ์หัวข้อการประชุมในไฟล์นั้น แล้วนำลิงก์ไฟล์ Docs มาส่ง",
+            "ชุดที่ 18: [Google Docs สารบัญ] สร้างเอกสารรายงานที่มีหัวข้อหลัก (Heading 1) 3 หัวข้อ และหัวข้อย่อย (Heading 2) 3 หัวข้อ (กระจายอยู่ 2-3 หน้า) จากนั้นแทรก 'สารบัญ (Table of Contents)' ไว้ที่หน้าแรกสุดของเอกสาร ตั้งค่าแชร์แบบ Viewer แล้วส่งลิงก์",
+            "ชุดที่ 19: [Google Slides แผนผัง] สร้างสไลด์ 1 หน้า ใช้เครื่องมือ แทรก (Insert) -> แผนภาพ (Diagram) เลือกรูปแบบลำดับชั้น (Hierarchy) เพื่อสร้างผังองค์กรสมมติที่มีอย่างน้อย 3 ระดับชั้น ตกแต่งสีให้สวยงาม ส่งลิงก์สไลด์แบบ Viewer",
+            "ชุดที่ 20: [Google Drive กู้คืน] สร้างไฟล์ Docs ชื่อ 'Delete_Me' ลบทิ้งลงถังขยะ จากนั้นไปกู้คืน (Restore) กลับมา เปลี่ยนชื่อไฟล์ใหม่เป็น 'Restored_Doc' พิมพ์อธิบายวิธีการกู้คืนลงไปในไฟล์นั้น ตั้งค่าแชร์ทุกคนเป็น Viewer แล้วส่งลิงก์"
+        ];
+
+        // ฟังก์ชันสุ่มอาเรย์ (Fisher-Yates)
+        const shuffleArray = (array) => {
+            let shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        };
+
+        // ครูต้องนำ URL ของ Web App ที่ได้จาก Google Apps Script มาใส่ที่บรรทัดนี้
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbx-XcaTNUPFCtTP_aaQXQqaKKNrzfwtI9lwXq0Sn8WqtVdsSNmbL0y_vHAKwa8jQP8/exec';
+
+        const App = () => {
+            const [step, setStep] = useState('login'); // login, exam, success
+            const [studentData, setStudentData] = useState({ name: '', number: '', room: '', password: '' });
+            const [errorMsg, setErrorMsg] = useState('');
+            
+            // จัดการเรื่องรหัสผ่านจาก Google Sheet
+            const [passwords, setPasswords] = useState({});
+            const [isLoadingConfig, setIsLoadingConfig] = useState(true);
+
+            // ข้อมูลการสอบ
+            const [examType, setExamType] = useState(''); // theory, practical
+            const [mcqQuestions, setMcqQuestions] = useState([]);
+            const [subjectiveQuestions, setSubjectiveQuestions] = useState([]);
+            const [practicalQuestion, setPracticalQuestion] = useState('');
+            
+            // คำตอบ
+            const [mcqAnswers, setMcqAnswers] = useState({});
+            const [subjAnswers, setSubjAnswers] = useState({});
+            const [practAnswer, setPractAnswer] = useState('');
+            const [isSubmitting, setIsSubmitting] = useState(false);
+
+            const theoryRooms = ['1', '4', '6', '7', '8', '9', '11'];
+            const practicalRooms = ['2', '3', '5', '10'];
+
+            // โหลดรหัสผ่านจาก Google Sheet เมื่อเปิดเว็บ
+            useEffect(() => {
+                const fetchPasswords = async () => {
+                    if (scriptURL === 'YOUR_GOOGLE_SCRIPT_URL_HERE' || !scriptURL) {
+                        // จำลองรหัสผ่านหากยังไม่ได้ใส่ URL (รหัส 1234 ทุกห้อง)
+                        const mockPasswords = {};
+                        [...theoryRooms, ...practicalRooms].forEach(room => mockPasswords[room] = '1234');
+                        setPasswords(mockPasswords);
+                        setIsLoadingConfig(false);
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(scriptURL + '?action=getPasswords');
+                        const data = await response.json();
+                        setPasswords(data);
+                    } catch (error) {
+                        console.error('Error fetching passwords:', error);
+                        setErrorMsg('ไม่สามารถดึงข้อมูลรหัสผ่านจากฐานข้อมูลได้ โปรดตรวจสอบ URL');
+                    }
+                    setIsLoadingConfig(false);
+                };
+                fetchPasswords();
+            }, []);
+
+            const handleLoginSubmit = (e) => {
+                e.preventDefault();
+                if (!studentData.name || !studentData.number || !studentData.room || !studentData.password) {
+                    setErrorMsg('กรุณากรอกข้อมูลให้ครบถ้วน');
+                    return;
+                }
+                
+                // ตรวจสอบรหัสผ่านจากที่ดึงมาจาก Sheet
+                const correctPassword = passwords[studentData.room];
+                if (!correctPassword) {
+                    setErrorMsg(`ไม่มีข้อมูลรหัสผ่านของ ม.6/${studentData.room} ในระบบฐานข้อมูล`);
+                    return;
+                }
+                
+                if (studentData.password !== correctPassword.toString()) {
+                    setErrorMsg(`รหัสผ่านเข้าห้องสอบ ม.6/${studentData.room} ไม่ถูกต้อง`);
+                    return;
+                }
+
+                setErrorMsg('');
+                
+                // จัดเตรียมข้อสอบตามห้อง
+                if (theoryRooms.includes(studentData.room)) {
+                    setExamType('theory');
+                    // สุ่มลำดับข้อและตัวเลือก
+                    const shuffledQs = shuffleArray(mcqPool).map(q => {
+                        const optionsWithIndex = q.options.map((opt, idx) => ({ text: opt, originalIndex: idx }));
+                        const shuffledOptions = shuffleArray(optionsWithIndex);
+                        return { ...q, options: shuffledOptions };
+                    });
+                    setMcqQuestions(shuffledQs);
+                    setSubjectiveQuestions(subjectivePool);
+                } else if (practicalRooms.includes(studentData.room)) {
+                    setExamType('practical');
+                    // สุ่ม 1 ข้อจาก 4 ชุด
+                    const randomSet = practicalPool[Math.floor(Math.random() * practicalPool.length)];
+                    setPracticalQuestion(randomSet);
+                }
+
+                setStep('exam');
+            };
+
+            const submitExam = async () => {
+                setIsSubmitting(true);
+                let score = 0;
+                
+                // ตรวจคำตอบปรนัย
+                if (examType === 'theory') {
+                    mcqQuestions.forEach(q => {
+                        if (mcqAnswers[q.id] === q.answer) score += 1;
+                    });
+                }
+
+                const payload = {
+                    name: studentData.name,
+                    number: studentData.number,
+                    room: studentData.room,
+                    examType: examType,
+                    mcqScore: score, // ส่งคะแนนไปด้วยแต่ไม่บอกเด็ก
+                    mcqAnswers: JSON.stringify(mcqAnswers),
+                    subjAnswers: JSON.stringify(subjAnswers),
+                    practAnswer: practAnswer,
+                    timestamp: new Date().toISOString()
+                };
+
+                try {
+                    console.log("Submitting payload:", payload);
+                    
+                    // ส่งข้อมูลไป Google Sheet เมื่อใส่ URL แล้ว
+                    if (scriptURL !== 'YOUR_GOOGLE_SCRIPT_URL_HERE') {
+                        await fetch(scriptURL, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                    }
+                    
+                    // หน่วงเวลาเพื่อให้แน่ใจว่าบันทึกเสร็จสิ้น
+                    await new Promise(r => setTimeout(r, 1500));
+                    setStep('success');
+                } catch (error) {
+                    console.error('Error!', error.message);
+                    alert('เกิดข้อผิดพลาดในการส่งข้อสอบ โปรดแจ้งคุณครู');
+                }
+                setIsSubmitting(false);
+            };
+
+            return (
+                <div className="min-h-screen pb-12">
+                    {/* Header */}
+                    <div className="bg-google-blue text-white py-6 px-4 shadow-md">
+                        <div className="max-w-4xl mx-auto">
+                            <h1 className="text-2xl md:text-3xl font-bold">คอมพิวเตอร์ Google for Education ว30280</h1>
+                            <p className="mt-2 text-lg">ระดับชั้นมัธยมศึกษาปีที่ 6 | สอนโดย ครูกุลดา ดาวทอง</p>
+                        </div>
+                    </div>
+
+                    <div className="max-w-4xl mx-auto mt-8 px-4">
+                        {step === 'login' && (
+                            <div className="bg-white p-6 md:p-8 rounded-xl shadow-lg border-t-8 border-blue-500">
+                                <h2 className="text-2xl font-semibold mb-6">ข้อมูลผู้เข้าสอบ</h2>
+                                <form onSubmit={handleLoginSubmit} className="space-y-5">
+                                    <div>
+                                        <label className="block text-gray-700 font-medium mb-2">ชื่อ - นามสกุล</label>
+                                        <input type="text" required
+                                            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            value={studentData.name}
+                                            onChange={e => setStudentData({...studentData, name: e.target.value})}
+                                            placeholder="ด.ช./ด.ญ./นาย/นางสาว..."
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-gray-700 font-medium mb-2">เลขที่</label>
+                                        <input type="number" required min="1" max="50"
+                                            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            value={studentData.number}
+                                            onChange={e => setStudentData({...studentData, number: e.target.value})}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-gray-700 font-medium mb-2">ห้อง (ม.6/...)</label>
+                                        <select required
+                                            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            value={studentData.room}
+                                            onChange={e => setStudentData({...studentData, room: e.target.value})}
+                                        >
+                                            <option value="">-- เลือกห้องเรียน --</option>
+                                            <option value="1">ม.6/1</option>
+                                            <option value="2">ม.6/2</option>
+                                            <option value="3">ม.6/3</option>
+                                            <option value="4">ม.6/4</option>
+                                            <option value="5">ม.6/5</option>
+                                            <option value="6">ม.6/6</option>
+                                            <option value="7">ม.6/7</option>
+                                            <option value="8">ม.6/8</option>
+                                            <option value="9">ม.6/9</option>
+                                            <option value="10">ม.6/10</option>
+                                            <option value="11">ม.6/11</option>
+                                        </select>
+                                    </div>
+                                    {studentData.room && (
+                                        <div className="animate-fade-in">
+                                            <label className="block text-gray-700 font-medium mb-2">รหัสผ่านเข้าห้องสอบ (1234)</label>
+                                            <input type="password" required
+                                                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                value={studentData.password}
+                                                onChange={e => setStudentData({...studentData, password: e.target.value})}
+                                            />
+                                        </div>
+                                    )}
+                                    
+                                    {errorMsg && <p className="text-red-500 font-medium">{errorMsg}</p>}
+                                    
+                                    <button type="submit" 
+                                        disabled={isLoadingConfig}
+                                        className={`w-full text-white font-bold py-3 px-4 rounded-md transition duration-300 ${isLoadingConfig ? 'bg-gray-400 cursor-not-allowed' : 'bg-google-blue hover:bg-blue-700'}`}>
+                                        {isLoadingConfig ? 'กำลังเชื่อมต่อฐานข้อมูลรหัสผ่าน...' : 'เข้าสู่ห้องสอบ'}
+                                    </button>
+                                </form>
+                            </div>
+                        )}
+
+                        {step === 'exam' && (
+                            <div className="space-y-6">
+                                <div className="bg-white p-4 rounded-lg shadow border-l-4 border-yellow-400 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                    <p className="font-semibold text-gray-700">ผู้สอบ: {studentData.name} | เลขที่: {studentData.number} | ห้อง: ม.6/{studentData.room}</p>
+                                    <button 
+                                        onClick={() => {
+                                            if(window.confirm('คุณต้องการย้อนกลับไปแก้ไขข้อมูลส่วนตัวใช่หรือไม่? (คำตอบที่ทำไว้จะยังคงอยู่)')) {
+                                                setStep('login');
+                                            }
+                                        }}
+                                        className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-md transition text-sm"
+                                    >
+                                        ย้อนกลับไปแก้ไขข้อมูล
+                                    </button>
+                                </div>
+
+                                {examType === 'theory' && (
+                                    <>
+                                        <div className="bg-white p-6 rounded-xl shadow-lg border-t-8 border-purple-500">
+                                            <h2 className="text-xl font-bold mb-4 text-purple-700">ตอนที่ 1: ปรนัย 4 ตัวเลือก (30 ข้อ)</h2>
+                                            {mcqQuestions.map((q, index) => (
+                                                <div key={q.id} className="mb-6 pb-6 border-b last:border-0">
+                                                    <p className="font-medium text-lg mb-3">{index + 1}. {q.q}</p>
+                                                    <div className="space-y-2">
+                                                        {q.options.map((opt, optIdx) => (
+                                                            <label key={optIdx} className="flex items-center space-x-3 p-3 border rounded-md hover:bg-gray-50 cursor-pointer">
+                                                                <input type="radio" 
+                                                                    name={`q_${q.id}`} 
+                                                                    value={opt.originalIndex}
+                                                                    onChange={() => setMcqAnswers({...mcqAnswers, [q.id]: opt.originalIndex})}
+                                                                    className="w-4 h-4 text-blue-600"
+                                                                />
+                                                                <span>{opt.text}</span>
+                                                            </label>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        
+                                        <div className="bg-white p-6 rounded-xl shadow-lg border-t-8 border-green-500">
+                                            <h2 className="text-xl font-bold mb-4 text-green-700">ตอนที่ 2: อัตนัย (5 ข้อ)</h2>
+                                            {subjectiveQuestions.map((q, index) => (
+                                                <div key={index} className="mb-6">
+                                                    <p className="font-medium text-lg mb-2">{q}</p>
+                                                    <textarea 
+                                                        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                        rows="3"
+                                                        placeholder="พิมพ์คำตอบของคุณที่นี่..."
+                                                        onChange={(e) => setSubjAnswers({...subjAnswers, [index]: e.target.value})}
+                                                    ></textarea>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
+
+                                {examType === 'practical' && (
+                                    <div className="bg-white p-6 rounded-xl shadow-lg border-t-8 border-pink-500">
+                                        <h2 className="text-xl font-bold mb-4 text-pink-700">ข้อสอบปฏิบัติ</h2>
+                                        <div className="bg-pink-50 p-4 rounded-md mb-6 border border-pink-200">
+                                            <p className="text-lg font-semibold mb-2">คำชี้แจง:</p>
+                                            <p className="text-gray-800 text-lg leading-relaxed">{practicalQuestion}</p>
+                                        </div>
+                                        <div>
+                                            <label className="block text-gray-700 font-medium mb-2">วางลิงก์ผลงานของคุณที่นี่ (URL)</label>
+                                            <input type="url" 
+                                                className="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-lg"
+                                                placeholder="https://docs.google.com/..."
+                                                value={practAnswer}
+                                                onChange={e => setPractAnswer(e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="flex justify-end mt-8">
+                                    <button 
+                                        onClick={() => {
+                                            if(window.confirm('คุณตรวจสอบคำตอบเรียบร้อยแล้วและต้องการส่งข้อสอบใช่หรือไม่?')) {
+                                                submitExam();
+                                            }
+                                        }}
+                                        disabled={isSubmitting}
+                                        className={`px-8 py-3 rounded-lg text-white font-bold text-lg shadow-lg ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-google-blue hover:bg-blue-700 transition'}`}
+                                    >
+                                        {isSubmitting ? 'กำลังบันทึกข้อมูล...' : 'ส่งข้อสอบ'}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {step === 'success' && (
+                            <div className="bg-white p-10 rounded-xl shadow-lg text-center border-t-8 border-green-500">
+                                <svg className="w-20 h-20 text-green-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <h2 className="text-3xl font-bold text-gray-800 mb-4">ส่งข้อสอบเรียบร้อยแล้ว</h2>
+                                <p className="text-lg text-gray-600 mb-6">ระบบได้บันทึกคำตอบและคำนวณคะแนนของคุณลงในฐานข้อมูลเรียบร้อยแล้ว (ไม่แสดงคะแนนตามเงื่อนไข)</p>
+                                <p className="text-md text-gray-500 mb-8">ขอบคุณ ด.ช./ด.ญ./นาย/นางสาว {studentData.name} <br/>ขอให้โชคดีกับการสอบครับ/ค่ะ</p>
+                                
+                                <button 
+                                    onClick={() => {
+                                        setStudentData({ name: '', number: '', room: '', password: '' });
+                                        setMcqAnswers({});
+                                        setSubjAnswers({});
+                                        setPractAnswer('');
+                                        setStep('login');
+                                    }}
+                                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-6 rounded-md transition"
+                                >
+                                    กลับหน้าแรก (สำหรับนักเรียนคนต่อไป)
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
