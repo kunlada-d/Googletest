@@ -26,8 +26,10 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // ฐานข้อมูลข้อสอบปรนัย (100 ข้อ) - ไม่มีเครื่องหมายคำถามท้ายประโยค และตัด Sheets, Forms, Classroom, Meet ออก
-        const mcqPool = [
+        // ==========================================
+        // 1. คลังข้อสอบวิชาที่ 1: คอมพิวเตอร์ Google for Education (ว30280)
+        // ==========================================
+        const mcqPoolGoogle = [
             // Gmail (1-20)
             { id: 1, q: "ข้อใดคือสัญลักษณ์ของการแนบไฟล์ใน Gmail", options: ["คลิปหนีบกระดาษ", "รูปฟันเฟือง", "รูปแว่นขยาย", "รูปซองจดหมาย"], answer: 0 },
             { id: 2, q: "ช่อง BCC ในการส่งอีเมลมีไว้เพื่อจุดประสงค์ใด", options: ["ส่งถึงผู้รับหลัก", "ส่งสำเนาโดยให้ทุกคนเห็นอีเมลกัน", "ส่งสำเนาซ่อนไม่ให้ผู้รับคนอื่นเห็นอีเมล", "ตั้งชื่อเรื่องอีเมล"], answer: 2 },
@@ -44,7 +46,7 @@
             { id: 13, q: "หากต้องการส่งไฟล์แนบขนาด 100 MB ผ่าน Gmail ระบบจะแนะนำให้ส่งวิธีใดแทนการแนบไฟล์โดยตรง", options: ["อัปโหลดไฟล์ขึ้น Google Drive แล้วส่งเป็นลิงก์แทน", "แบ่งไฟล์ออกเป็น 4 ส่วนเพื่อแนบส่งแยกเมล", "ส่งลิงก์ผ่านระบบโซเชียลมีเดียอื่นๆ", "ใช้โปรแกรมบีบอัดไฟล์ให้เหลือ 20 MB แล้วค่อยส่ง"], answer: 0 },
             { id: 14, q: "ฟังก์ชันใดใน Gmail ที่ใช้สำหรับตอบกลับอีเมลของผู้ส่งเพียงคนเดียวเท่านั้น", options: ["ตอบกลับทั้งหมด (Reply All)", "ตอบกลับ (Reply)", "ส่งต่อ (Forward)", "เก็บถาวร (Archive)"], answer: 1 },
             { id: 15, q: "ฟังก์ชันใดใน Gmail ที่ใช้สำหรับส่งข้อความต่อไปให้บุคคลอื่นที่ไม่มีชื่ออยู่ในกลุ่มสนทนาเดิม", options: ["ตอบกลับ (Reply)", "ตอบกลับทั้งหมด (Reply All)", "ส่งต่อ (Forward)", "ติดดาว (Star)"], answer: 2 },
-            { id: 16, q: "ป้ายกำกับประเภทใดใน Gmail ที่ระบบใช้รวบรวมอีเมลขยะหรืออีเมลโฆษณาที่น่าสงสัย", options: ["จดหมายขยะ (Spam)", "ถังขยะ (Trash)", "ร่างจดหมาย (Drafts)", "สำคัญ (Important)"], answer: 0 },
+            { id: 16, q: "ป้ายกำกับประเภทใด in Gmail ที่ระบบใช้รวบรวมอีเมลขยะหรืออีเมลโฆษณาที่น่าสงสัย", options: ["จดหมายขยะ (Spam)", "ถังขยะ (Trash)", "ร่างจดหมาย (Drafts)", "สำคัญ (Important)"], answer: 0 },
             { id: 17, q: "จดหมายที่ถูกลบออกจากกล่องจดหมายเข้าใน Gmail จะถูกเก็บอยู่ในถังขยะเป็นเวลากี่วันก่อนจะถูกลบถาวร", options: ["7 วัน", "15 วัน", "30 วัน", "60 วัน"], answer: 2 },
             { id: 18, q: "หากต้องการจัดระเบียบหน้ากล่องจดหมายเข้า (Inbox) ให้แสดงเฉพาะอีเมลที่ยังไม่ได้อ่านไว้ด้านบนสุด ต้องตั้งค่าที่หัวข้อใด", options: ["ประเภทกล่องจดหมาย (Inbox type)", "ป้ายกำกับ (Labels)", "ธีม (Themes)", "บัญชีและการนำเข้า"], answer: 0 },
             { id: 19, q: "ฟีเจอร์ ส่งตามเวลาที่กำหนด (Schedule send) ใน Gmail มีประโยชน์อย่างไร", options: ["ช่วยส่งอีเมลแจ้งเตือนภัยให้ผู้รับรู้ทันที", "ช่วยตั้งเวลาส่งอีเมลล่วงหน้าโดยอัตโนมัติ", "ช่วยยืดเวลาส่งไฟล์ให้ยาวขึ้น", "ช่วยจับเวลาที่ผู้รับกำลังเปิดอ่านอีเมล"], answer: 1 },
@@ -138,11 +140,10 @@
             { id: 97, q: "หากนักเรียนเข้าใช้งาน Google Workspace และพบปัญหาลืมรหัสผ่านใช้งานระบบของสถาบันที่ใช้อยู่ ควรดำเนินการสอบถามข้อมูลจากส่วนงานใด", options: ["ผู้ดูแลระบบไอทีของโรงเรียน (Admin) หรือครูผู้รับผิดชอบงานระบบเครือข่าย", "ติดต่อแจ้งปัญหาโดยตรงกับผู้ก่อตั้งบริษัท Google", "ทำเรื่องส่งแจ้งตำรวจเพื่อดำเนินการทางคดี", "แฮกและเขียนรหัสผ่านขึ้นมาทำงานระบบคอมพิวเตอร์แบบออฟไลน์"], answer: 0 },
             { id: 98, q: "เครื่องมือใดของระบบการศึกษาที่เปรียบเสมือนสมุดบันทึกภาพจดโน้ตย่อและรวบรวมไอเดียด่วนโดยทำงานร่วมกันได้สวยงาม", options: ["Google Keep", "Google Translate", "Google Calendar Finder", "Google Drive Cloud Engine"], answer: 0 },
             { id: 99, q: "การจัดกลุ่มที่อยู่อีเมลใน Google Contacts ด้วยการกำหนดป้ายกำกับเดียวกัน สามารถมีชื่อสมาชิกผู้ติดต่อสูงสุดได้กี่รายชื่อในหนึ่งกลุ่ม", options: ["จำกัดเพียงแค่ไม่เกิน 10 รายชื่อ", "จำกัดไม่เกิน 50 รายชื่อ", "ไม่มีข้อใดถูก สามารถเพิ่มรายชื่อลงในกลุ่มได้มากตามโควตาพื้นที่ของบัญชี", "จำกัดสิทธิ์ให้มีได้เฉพาะคนในโรงเรียนเดียวกัน"], answer: 2 },
-            { id: 100, q: "หากประวัติผู้ติดต่อไปทับซ้อนหรือมีชื่อเพื่อนซ้ำกันสองครั้งในระบบ Google Contacts จะใช้เครื่องมือใดจัดการกวาดล้างและรวมข้อมูลให้เหลืออันเดียว", options: ["เครื่องมือรวมและแก้ไข (Merge & fix)", "เครื่องมือคัดแยกข้อมูลแบบกรองแยก", "เครื่องมือจัดเก็บไฟล์ประวัติแบบเรียลไทม์", "เครื่องมือล้างข้อมูลด่วน"], answer: 0|0 }
+            { id: 100, q: "หากประวัติผู้ติดต่อไปทับซ้อนหรือมีชื่อเพื่อนซ้ำกันสองครั้งในระบบ Google Contacts จะใช้เครื่องมือใดจัดการกวาดล้างและรวมข้อมูลให้เหลืออันเดียว", options: ["เครื่องมือรวมและแก้ไข (Merge & fix)", "เครื่องมือคัดแยกข้อมูลแบบกรองแยก", "เครื่องมือจัดเก็บไฟล์ประวัติแบบเรียลไทม์", "เครื่องมือล้างข้อมูลด่วน"], answer: 0 }
         ];
 
-        // ฐานข้อมูลข้อสอบอัตนัย (20 ข้อ) - ไม่มีเครื่องหมายคำถามท้ายประโยค และตัดแอปพลิเคชันที่ยังไม่ได้เรียนออก
-        const subjectivePool = [
+        const subjectivePoolGoogle = [
             "1. จงอธิบายความแตกต่างระหว่างการแชร์ไฟล์แบบ ผู้มีสิทธิ์อ่าน (Viewer), ผู้แสดงความคิดเห็น (Commenter) และ เอดิเตอร์ (Editor) ใน Google Drive",
             "2. ให้อธิบายขั้นตอนการสร้างนัดหมายการประชุมกลุ่มใน Google Calendar และวิธีการเชิญเพื่อนเข้าร่วมประชุม",
             "3. Google Contacts มีประโยชน์อย่างไรต่อการส่งอีเมล (Gmail) ไปหาเพื่อนทั้งห้อง 40 คน",
@@ -165,11 +166,71 @@
             "20. จงแสดงทัศนคติวิเคราะห์ว่า ปุ่มกู้คืนประวัติเวอร์ชัน (Version History) ช่วยแก้ไขปัญหาการทำงานทับซ้อนและข้อมูลสูญหายในการทำงานกลุ่มได้อย่างไร"
         ];
 
-        // ฐานข้อมูลข้อสอบปฏิบัติ (20 ชุด) ที่ปรับปรุงเอา Sheets, Forms, Classroom, Meet ออก และไม่มีเครื่องหมายคำถาม
+
+        // ==========================================
+        // 2. คลังข้อสอบวิชาที่ 2: AI และการคิดวิเคราะห์ 
+        // ==========================================
+        const mcqPoolAI = [
+            { id: 1, q: "ข้อใดอธิบายความหมายของ AI ได้ถูกต้องที่สุด", options: ["โปรแกรมที่สามารถเชื่อมต่ออินเทอร์เน็ตได้", "เทคโนโลยีที่สามารถเรียนรู้ วิเคราะห์ และสร้างคำตอบจากข้อมูล", "โปรแกรมที่ค้นหาข้อมูลจาก Google เท่านั้น", "โปรแกรมที่เขียนขึ้นเพื่อเล่นเกม"], answer: 1 },
+            { id: 2, q: "ข้อใดเป็นตัวอย่างของการใช้ AI ในชีวิตประจำวัน", options: ["เครื่องคิดเลขธรรมดา", "โปรแกรม Paint", "ระบบแนะนำวิดีโอใน YouTube", "แฟลชไดรฟ์"], answer: 2 },
+            { id: 3, q: "จุดประสงค์หลักของการใช้ AI ในการเรียนคือข้อใด", options: ["ให้ AI ทำการบ้านแทนทั้งหมด", "ใช้ AI เป็นเครื่องมือช่วยคิดและช่วยเรียน", "ใช้ AI เพื่อคัดลอกคำตอบ", "ใช้ AI แทนครู"], answer: 1 },
+            { id: 4, q: "ข้อใดไม่ใช่ข้อจำกัดของ AI", options: ["อาจให้ข้อมูลผิด", "ต้องตรวจสอบข้อมูลก่อนใช้งาน", "เข้าใจความรู้สึกของมนุษย์เหมือนคนจริง", "อาจให้ข้อมูลไม่เป็นปัจจุบัน"], answer: 2 },
+            { id: 5, q: "หาก AI ให้คำตอบที่น่าสงสัย นักเรียนควรทำอย่างไร", options: ["เชื่อทันที", "นำไปส่งงานเลย", "ตรวจสอบจากแหล่งข้อมูลอื่น", "ลบคำตอบทั้งหมด"], answer: 2 },
+            { id: 6, q: "Prompt คืออะไร", options: ["โปรแกรมคอมพิวเตอร์", "คำสั่งหรือข้อความที่ใช้สื่อสารกับ AI", "ระบบปฏิบัติการ", "โปรแกรมค้นหา"], answer: 1 },
+            { id: 7, q: "ข้อใดเป็น Prompt ที่ดีที่สุด", options: ["อธิบายฟุตบอล", "ฟุตบอลคืออะไร", "อธิบายกติกาฟุตบอลอย่างง่ายสำหรับนักเรียน ม.1 เป็นข้อๆ", "เขียนเรื่องฟุตบอลมาหน่อย"], answer: 2 },
+            { id: 8, q: "บทบาท (Role) ใน Prompt มีประโยชน์อย่างไร", options: ["ทำให้ AI ตอบคำถามได้ยาวขึ้น", "กำหนดมุมมองหรือบุคลิกภาพของ AI ให้สอดคล้องกับงาน", "ช่วยประหยัดแบตเตอรี่คอมพิวเตอร์", "ทำให้ส่งคำสั่งไปเร็วขึ้น"], answer: 1 },
+            { id: 9, q: "หากต้องการเขียนเรียงความที่มีคุณภาพ ควรตั้งคำถามกับ AI อย่างไร", options: ["พิมพ์คำสั้นๆ คำเดียว", "ระบุรายละเอียดของงาน เช่น ความยาว วัตถุประสงค์ และผู้ฟัง", "สั่งให้ AI ลอกคำตอบของคนอื่น", "พิมพ์เป็นภาษาอังกฤษเท่านั้น"], answer: 1 },
+            { id: 10, q: "ข้อใดคือตัวอย่างของการกำหนดบทบาท (Role) ในการสั่งงาน AI", options: ["เขียนมา 3 บรรทัด", "คุณคือผู้เชี่ยวชาญด้านประวัติศาสตร์ไทย", "ขอความยาว 500 คำ", "เขียนเรื่องสงครามโลก"], answer: 1 },
+            { id: 11, q: "เหตุใด AI จึงอาจให้ข้อมูลที่ไม่ถูกต้องหรือเกิดภาพลวงตา (Hallucination)", options: ["ระบบต้องการหลอกลวงมนุษย์", "ความคลาดเคลื่อนของโมเดลทางสถิติหรือฐานข้อมูลที่ใช้ฝึกฝน", "อินเทอร์เน็ตของระบบล่ม", "หน้าจอคอมพิวเตอร์เสีย"], answer: 1 },
+            { id: 12, q: "ข้อใดเป็นพฤติกรรมที่ไม่เหมาะสมในการใช้ AI ช่วยเขียนเรียงความ", options: ["ใช้ AI ช่วยหาไอเดียแล้วนำมาเรียบเรียงใหม่ด้วยภาษาของตนเอง", "คัดลอกข้อความทั้งหมดจาก AI แล้วส่งครูโดยไม่อ้างอิงแหล่งที่มา", "ตรวจสอบข้อเท็จจริงของข้อมูลที่ AI ให้มาก่อนส่งครู", "ระบุว่ามีการใช้ AI ช่วยในการสืบค้นข้อมูล"], answer: 1 },
+            { id: 13, q: "เครื่องมือค้นหาทั่วไป (เช่น Google Search) แตกต่างจาก AI Chatbot (เช่น Gemini) อย่างไร", options: ["Google ค้นหาข้อมูลได้เร็วกว่าเสมอ", "AI Chatbot สามารถสร้างประโยคตอบคำถามและทำงานตามคำสั่งได้เฉพาะเจาะจงมากกว่าการส่งลิงก์หน้าเว็บ", "Google ใช้คนจริงตอบคำถามส่วน AI ไม่ใช้", "ไม่มีข้อใดถูก"], answer: 1 },
+            { id: 14, q: "ข้อมูลประเภทใดที่ AI มักตอบได้ไม่ถูกต้องและต้องระมัดระวังมากที่สุด", options: ["สูตรคณิตศาสตร์พื้นฐาน", "ข้อมูลเหตุการณ์สดในปัจจุบันหรือข้อมูลเชิงลึกเฉพาะกลุ่ม", "การแปลภาษาอังกฤษทั่วไป", "ประวัติศาสตร์โบราณ"], answer: 1 },
+            { id: 15, q: "การใช้งาน AI ในข้อใดเสี่ยงต่อความปลอดภัยของข้อมูลส่วนบุคคล", options: ["สั่งให้ AI อธิบายสูตรฟิสิกส์", "พิมพ์เลขบัตรประชาชน รหัสผ่าน หรือข้อมูลส่วนตัวของครอบครัวลงไปในแชท AI", "ใช้ AI แปลคำศัพท์ภาษาไทยเป็นภาษาอังกฤษ", "ใช้ AI ช่วยวางแผนจัดสัมมนาท่องเที่ยว"], answer: 1 },
+            { id: 16, q: "หากนักเรียนต้องการเขียน Prompt เพื่อให้ AI ตรวจสอบการสะกดคำในเรียงความ ควรใช้ Prompt ใด", options: ["ตรวจคำผิดให้หน่อย", "ช่วยอ่านบทความนี้หน่อย", "ตรวจคำผิดและคำสะกดตามหลักภาษาไทยในเรียงความนี้และขีดเส้นใต้จุดแก้ไข", "เขียนบทความนี้ใหม่หมดเลย"], answer: 2 },
+            { id: 17, q: "ประโยชน์ของการใช้งาน AI ในการคิดวิเคราะห์คือข้อใด", options: ["ช่วยเป็นคู่คิดในการระดมสมองและเสนอแนะมุมมองที่เรามองข้าม", "ช่วยคิดแทนมนุษย์ได้ทุกเรื่องโดยไม่ต้องใช้สมอง", "ช่วยตัดสินใจแก้ปัญหาชีวิตให้ทั้งหมด", "ป้องกันการลอกข้อสอบ"], answer: 0 },
+            { id: 18, q: "ข้อใดคือความสามารถของ Generative AI", options: ["การคำนวณเลขในเครื่องคิดเลขธรรมดา", "การสร้างเนื้อหาใหม่ เช่น ข้อความ รูปภาพ โค้ดคอมพิวเตอร์ จากข้อมูลเรียนรู้เดิม", "การบันทึกเสียงธรรมดา", "การส่งอีเมลอัตโนมัติ"], answer: 1 },
+            { id: 19, q: "การใส่ข้อจำกัด (Constraints) ใน Prompt เช่น \"ห้ามใช้คำทับศัพท์ภาษาอังกฤษ\" มีประโยชน์อย่างไร", options: ["ช่วยคัดกรองขอบเขตคำตอบของ AI ให้ตรงตามเงื่อนไขที่กำหนด", "ทำให้ AI ทำงานช้าลง", "ทำให้คำตอบสั้นลงเท่านั้น", "ป้องกันไม่ให้ AI แฮกข้อมูลเครื่องคอมพิวเตอร์"], answer: 0 },
+            { id: 20, q: "นักเรียนคนหนึ่งส่ง Prompt ว่า \"เขียนเรื่องสั้น\" AI ให้คำตอบที่ไม่ถูกใจ นักเรียนควรปรับปรุงอย่างไร", options: ["เลิกใช้ AI นี้", "เปลี่ยนไปเขียนในสมุดแทน", "ปรับปรุง Prompt โดยระบุแนวเรื่อง (เช่น ไซไฟ รัก) ตัวละครเอก และความยาวของเรื่องสั้นที่ต้องการ", "ตะโกนใส่ไมโครโฟน"], answer: 2 },
+            { id: 21, q: "การระบุผู้รับสาร (Audience) ใน Prompt เช่น \"เขียนอธิบายให้เด็กอายุ 7 ปีเข้าใจ\" มีประโยชน์อย่างไร", options: ["เพื่อให้ AI ใช้ภาษาและระดับเนื้อหาที่เหมาะสมกับผู้อ่าน", "เพื่อให้ AI ตอบได้ยาวขึ้น", "เพื่อป้องกันไม่ให้ผู้ใหญ่เห็นคำตอบ", "เพื่อลบคำหยาบคาย"], answer: 0 },
+            { id: 22, q: "ข้อใดอธิบายความแตกต่างระหว่าง ปัญญาประดิษฐ์ (AI) และ การเขียนโปรแกรมทั่วไป (Classic Programming) ได้ถูกต้องที่สุด", options: ["การเขียนโปรแกรมทั่วไปให้ผลลัพธ์ฉลาดกว่า AI", "โปรแกรมทั่วไปทำงานตามเงื่อนไขที่เขียนไว้ตายตัว ส่วน AI เรียนรู้จากข้อมูลเพื่อหาวิธีทำด้วยตัวเอง", "AI ไม่ต้องใช้ไฟฟ้าในการประมวลผล", "โปรแกรมทั่วไปทำงานเฉพาะบนมือถือ"], answer: 1 },
+            { id: 23, q: "ข้อใดคือสิ่งสำคัญที่มนุษย์ต้องทำหลังได้รับคำตอบจาก AI ทุกครั้ง", options: ["คัดลอกและส่งงานทันที", "นำคำตอบไปลงทะเบียนจดสิทธิบัตร", "ตรวจสอบความถูกต้องและประเมินความสมเหตุสมผลของคำตอบก่อนนำไปใช้งาน", "สั่งให้ AI แปลเป็นภาษาอื่นอีกรอบ"], answer: 2 },
+            { id: 24, q: "ภาพลวงตา AI (AI Hallucination) ส่งผลเสียต่อนักเรียนที่ทำรายงานอย่างไร", options: ["หน้าจอคอมพิวเตอร์แสดงผลเป็นภาพ 3D", "นักเรียนอาจได้ข้อมูลที่ไม่มีอยู่จริงหรือข้อมูลบิดเบือนไปใส่ในรายงาน", "ไฟล์รายงานจะถูกไวรัสโจมตี", "ทำให้ส่งรายงานเร็วขึ้น"], answer: 1 },
+            { id: 25, q: "หากต้องการใช้ AI ช่วยระดมความคิดเห็น (Brainstorming) เพื่อจัดงานวันปีใหม่ของโรงเรียน Prompt ใดเหมาะสมที่สุด", options: ["จัดงานปีใหม่", "ขอไอเดียจัดงานปีใหม่โรงเรียนที่ประหยัดงบ มีกิจกรรมสร้างสรรค์ และรองรับนักเรียน 500 คน มา 10 ไอเดีย", "เขียนการ์ดวันปีใหม่ให้หน่อย", "ปีใหม่คือวันอะไร"], answer: 1 },
+            { id: 26, q: "AI ในปัจจุบันข้อใดจำลองการวิเคราะห์ภาพถ่ายเพื่อระบุประเภทของวัตถุ", options: ["Image Recognition (การจดจำรูปภาพ)", "Machine Translation (การแปลภาษาด้วยเครื่อง)", "Voice Assistant (ผู้ช่วยสั่งการด้วยเสียง)", "Text Generation (การสร้างข้อความ)"], answer: 0 },
+            { id: 27, q: "การลอกผลงานของ AI มาส่งเป็นผลงานของตัวเองทั้งหมดโดยไม่มีการอ้างอิง ถือว่าขัดต่อข้อใด", options: ["จริยธรรมและทรัพย์สินทางปัญญา (Academic Integrity)", "กฎระเบียบของระบบเครือข่ายอินเทอร์เน็ต", "ข้อตกลงความปลอดภัยส่วนบุคคล", "พระราชบัญญัติคอมพิวเตอร์"], answer: 0 },
+            { id: 28, q: "ข้อใดไม่ใช่ส่วนประกอบที่มักเขียนอยู่ใน Prompt คุณภาพ (Effective Prompt)", options: ["บทบาทสมมติ (Role)", "เป้าหมายของงาน (Task/Goal)", "รหัสผ่านและบัญชีผู้ใช้ส่วนตัว (Credentials)", "บริบทและข้อจำกัด (Context & Constraints)"], answer: 2 },
+            { id: 29, q: "ในการทำงานร่วมกับ AI ข้อใดคือบทบาทของมนุษย์ที่ AI ไม่สามารถทำแทนได้", options: ["การคิดริเริ่ม วิเคราะห์อย่างมีวิจารณญาณ และตัดสินใจเชิงจริยธรรม", "การพิมพ์ตัวอักษรอย่างรวดเร็ว", "การจัดเก็บฐานข้อมูลจำนวนมหาศาล", "การประมวลผลการคำนวณขั้นสูง"], answer: 0 },
+            { id: 30, q: "ปัญญาประดิษฐ์ประเภทที่เน้นการทำนายหรือจำแนกหมวดหมู่จากข้อมูล เช่น ระบบแยกแยะอีเมลขยะ จัดเป็น AI รูปแบบใด", options: ["Generative AI", "Predictive AI / Classification AI", "General Artificial Intelligence (AGI)", "Super Intelligent AI"], answer: 1 },
+            { id: 31, q: "ข้อใดเป็นความหมายของคำว่า \"Bias\" หรือ \"ความอคติ\" ในระบบ AI", options: ["ความเร็วในการประมวลผลลดลง", "การที่ AI แสดงทัศนคติหรือให้ข้อมูลที่เอียงเอียงตามชุดข้อมูลที่ใช้ฝึกสอนซึ่งไม่สมดุล", "การส่งข้อมูลผิดพลาดไปยังผู้รับ", "การประหยัดพลังงานในคอมพิวเตอร์"], answer: 1 },
+            { id: 32, q: "หากต้องการฝึกทักษะการคิดวิเคราะห์ (Critical Thinking) ร่วมกับ AI นักเรียนควรใช้งานในลักษณะใด", options: ["ขอให้ AI สรุปเนื้อหาและเปรียบเทียบจุดเด่น-จุดด้อยของแนวคิดต่างๆ เพื่ออภิปรายร่วมกัน", "คัดลอกคำตอบของ AI ไปตอบครูโดยไม่คิดเพิ่ม", "สั่งให้ AI บอกคำตอบที่ง่ายที่สุดคำตอบเดียว", "ให้ AI สอบแทนตนเอง"], answer: 0 },
+            { id: 33, q: "ข้อดีของการให้ AI ช่วยป้อนข้อโต้แย้ง (Counter-argument) ต่อแนวคิดของตนเองคือข้อใด", options: ["ช่วยทำให้เราเห็นจุดอ่อนในแนวคิดของตนเองและสามารถพัฒนาข้อสนับสนุนให้รัดกุมยิ่งขึ้น", "ทำให้เราเกิดความท้อแท้และล้มเลิกโครงงาน", "ทำให้ AI ชนะการประกวดผลงาน", "ช่วยประหยัดเวลาพิมพ์รายงาน"], answer: 0 },
+            { id: 34, q: "ข้อใดอธิบายเรื่องระบบประมวลผลภาษาธรรมชาติ (NLP - Natural Language Processing) ได้ถูกต้องที่สุด", options: ["ความสามารถของ AI ในการเข้าใจและตอบสนองต่อภาษาของมนุษย์", "ระบบควบคุมหุ่นยนต์อุตสาหกรรม", "โปรแกรมปรับแต่งภาพให้คมชัด", "การส่งอีเมลโต้ตอบด่วน"], answer: 0 },
+            { id: 35, q: "หากต้องการใช้ AI แปลภาษาให้ได้ความสละสลวยตามบริบทวัฒนธรรมไทย Prompt ที่ควรเพิ่มเติมคืออะไร", options: ["แปลให้สั้นที่สุด", "แปลข้อความต่อไปนี้เป็นภาษาไทย โดยปรับสำนวนให้เป็นทางการและสละสลวยตามบริบทการพูดคุยของไทย", "แปลภาษาตัวต่อตัว", "แปลข้อความนี้ด่วนที่สุด"], answer: 1 },
+            { id: 36, q: "การให้ข้อมูลแบบ \"Few-Shot Prompting\" ในการสั่งงาน AI หมายถึงการทำสิ่งใด", options: ["การพิมพ์คำสั่งสั้นๆ เพียงคำเดียว", "การให้คำอธิบายพร้อมยกตัวอย่างรูปแบบคำตอบที่ต้องการอย่างน้อย 1-2 ตัวอย่างแก่ AI ก่อนให้ทำงานจริง", "การสั่งงาน AI ซ้ำๆ หลายครั้งในเวลาอันสั้น", "การปิดระบบแชทของ AI ทันทีหลังทำงานเสร็จ"], answer: 1 },
+            { id: 37, q: "เมื่อได้รับข้อมูลสถิติที่น่าสนใจจาก AI นักเรียนควรมีวิธีสืบค้นตรวจสอบข้อเท็จจริงอย่างไร", options: ["ค้นหาแหล่งอ้างอิงต้นฉบับหรือรายงานวิจัยที่สอดคล้องกับตัวเลขนั้นจากฐานข้อมูลที่น่าเชื่อถือ", "พิมพ์ถาม AI ซ้ำๆ ว่ามั่นใจหรือไม่", "นำไปใช้อ้างอิงได้ทันทีเพราะ AI ได้รับการอัปเดตตลอดเวลา", "ส่งรูปภาพให้คนอื่นตรวจสอบแทน"], answer: 0 },
+            { id: 38, q: "ข้อใดคือลักษณะของการตั้งคำถามแบบกว้างเกินไป (Vague Question) ที่ทำให้ AI ตอบคำถามได้ไม่ดี", options: ["อธิบายประวัติศาสตร์ยุโรป", "เปรียบเทียบสาเหตุของการปฏิวัติฝรั่งเศสและปฏิวัติอุตสาหกรรมอังกฤษมาเป็นข้อๆ", "เขียนรายงานเรื่องการลดคาร์บอนในประเทศไทยปี 2025 ความยาว 500 คำ", "สรุปขั้นตอนการทำแกงเขียวหวานสำหรับมือใหม่มาเป็นข้อๆ"], answer: 0 },
+            { id: 39, q: "ระบบปัญญาประดิษฐ์ที่พัฒนาขึ้นเพื่อตอบคำถามและพูดคุยโต้ตอบกับมนุษย์แบบแชทเรียกว่าอะไร", options: ["Conversational AI / AI Chatbot", "Search Engine Optimizer", "Image Generator", "Cloud Computing System"], answer: 0 },
+            { id: 40, q: "ข้อใดคือหัวใจสำคัญในการคิดวิเคราะห์ก่อนนำคำตอบของ AI ไปเผยแพร่", options: ["ความเร็วในการส่งข้อมูล", "ความน่าเชื่อถือของเนื้อหา จริยธรรมในการใช้งาน และการอ้างอิงแหล่งที่มาที่ถูกต้อง", "การมีสไตล์ฟอนต์ที่สวยงาม", "การมีหน้าปกรายงานที่ดึงดูดสายตา"], answer: 1 }
+        ];
+
+        const subjectivePoolAI = [
+            "ข้อ 1: จากตัวอย่างการใช้งาน AI ในปัจจุบัน ให้นักเรียนยกตัวอย่างแอปพลิเคชันหรือระบบที่นักเรียนเคยใช้งานและคิดว่ามี AI เป็นเบื้องหลังมา 1 ตัวอย่าง พร้อมอธิบายว่า AI ในแอปพลิเคชันนั้นช่วยอำนวยความสะดวกในเรื่องใดบ้าง (4 คะแนน)",
+            "ข้อ 2: หากนักเรียนต้องการใช้ AI ช่วยสรุปเนื้อหาบทเรียนที่ยากๆ ให้นักเรียนเขียน Prompt คุณภาพที่มีส่วนประกอบครบถ้วน (บทบาท, เป้าหมาย, บริบท, รูปแบบผลลัพธ์) เพื่อให้ได้คำตอบที่มีประสิทธิภาพที่สุด (4 คะแนน)",
+            "ข้อ 3: นักเรียนใช้ AI ช่วยเขียนรายงาน แล้วพบว่าข้อมูลบางส่วนไม่ตรงกับหนังสือเรียน นักเรียนจะมีวิธีตรวจสอบข้อมูลอย่างไร อย่างน้อย 4 วิธี (4 คะแนน)",
+            "ข้อ 4: นักเรียนคนหนึ่งคัดลอกคำตอบจาก AI ทั้งหมดแล้วส่งครู โดยไม่ได้อ่านหรือแก้ไข นักเรียนเห็นด้วยหรือไม่ เพราะเหตุใด (4 คะแนน)",
+            "ข้อ 5: จากสิ่งที่เรียนมา นักเรียนคิดว่า AI เป็น \"ผู้ช่วย\" หรือ \"ผู้แทน\" ของมนุษย์ เพราะเหตุใด จงอธิบายพร้อมยกตัวอย่างอย่างน้อย 2 ตัวอย่าง (4 คะแนน)"
+        ];
+
+
+        // ==========================================
+        // 3. คลังข้อสอบปฏิบัติ (วิชา Google for Education เท่านั้น)
+        // ==========================================
         const practicalPool = [
             "ชุดที่ 1: [Google Drive & Docs] ให้สร้างโฟลเดอร์ใน Drive ชื่อ 'Final_Project_ชื่อนักเรียน' ภายในให้สร้างเอกสาร Docs 1 ไฟล์ ตั้งหน้ากระดาษเป็นแนวนอน (Landscape) แทรกตารางขนาด 3x4 และแทรกรูปภาพประกอบ 1 รูป จากนั้นตั้งค่าแชร์โฟลเดอร์หลักให้ 'ทุกคนที่มีลิงก์' เป็น 'ผู้มีสิทธิ์อ่าน' แล้วนำลิงก์โฟลเดอร์มาส่ง",
             "ชุดที่ 2: [Google Slides & Calendar] ให้สร้างสไลด์ 5 หน้า แนะนำสถานที่ท่องเที่ยว ใส่ Transition ทุกหน้า จากนั้นสร้างกิจกรรมใน Calendar นัดหมายนำเสนองานวันศุกร์หน้า เวลา 10:00 น. และแนบไฟล์สไลด์นี้เข้าไปในกิจกรรม คัดลอกลิงก์ของไฟล์สไลด์ (ตั้งค่าเป็น Viewer) มาส่ง",
+            "ชุดที่ 3: [Google Docs ขั้นสูง] ให้สร้างเอกสาร Docs เพื่อทำจดหมายข่าว (Newsletter) โดยต้องมีการตั้งค่าเนื้อหาเป็น 2 คอลัมน์ แทรกรูปภาพพร้อมตั้งค่าการตัดข้อความ (Text Wrapping) ให้ข้อความล้อมรอบรูป และใส่ลายน้ำ (Watermark) เป็นชื่อตนเอง นำลิงก์มาส่ง",
             "ชุดที่ 4: [Google Calendar & Gmail] ให้สร้างนัดหมายการทำงานกลุ่มซ้ำ (Recurring event) ทุกวันจันทร์ เวลา 13.00-14.00 น. เป็นเวลา 4 สัปดาห์ ใส่รายละเอียดตารางงาน และตั้งค่าส่งอีเมลเชิญเพื่อนอย่างน้อย 2 คน นำลิงก์ปฏิทินหรือประวัติมาส่ง",
+            "ชุดที่ 5: [Google Docs การอ้างอิง] ให้พิมพ์สรุปความรู้เรื่อง AI ความยาว 1 หน้ากระดาษ โดยใช้เครื่องมือ 'การสำรวจ (Explore)' หรือ 'การอ้างอิง (Citations)' เพื่อแทรกเชิงอรรถ (Footnote) อ้างอิงแหล่งที่มาอย่างน้อย 2 แหล่ง ตั้งค่าแชร์เป็น 'ผู้แสดงความคิดเห็น (Commenter)' แล้วนำลิงก์มาส่ง",
             "ชุดที่ 6: [Google Slides Interactive] ให้สร้างงานนำเสนอ 3 หน้า หน้าแรกทำเป็นเมนู (สารบัญ) ที่มีการสร้างไฮเปอร์ลิงก์ (Hyperlink) กดแล้วกระโดดไปหน้า 2 และหน้า 3 ได้ หน้าที่ 2 ให้แทรกรูปภาพหรือวิดีโออธิบายความหมาย ตั้งค่าแชร์ให้ทุกคนดูได้ แล้วนำลิงก์มาส่ง",
             "ชุดที่ 7: [Google Drive การจัดการสิทธิ์] สร้างโฟลเดอร์ชื่อ 'M6_Data' ภายในสร้าง 2 โฟลเดอร์ย่อยคือ 'Public' และ 'Private' สร้างไฟล์ Docs ในทั้งสองโฟลเดอร์ย่อย ตั้งค่าแชร์โฟลเดอร์ 'Public' ให้ทุกคนเป็น Viewer และโฟลเดอร์ 'Private' ห้ามแชร์ให้ใคร ส่งลิงก์โฟลเดอร์หลัก 'M6_Data'",
             "ชุดที่ 8: [Google Docs Collaboration] ให้สร้างเอกสาร Docs พิมพ์บทความสั้นๆ 1 ย่อหน้า จากนั้นใช้โหมด 'การแนะนำ (Suggesting)' ในการแก้ไขคำผิดหรือเพิ่มข้อความ 2 จุด และเพิ่ม 'ความคิดเห็น (Comment)' เจาะจงที่ประโยค 1 จุด ตั้งค่าแชร์เป็น 'เอดิเตอร์ (Editor)' แล้วส่งลิงก์",
@@ -179,6 +240,7 @@
             "ชุดที่ 12: [Google Calendar ตั้งเวลา] สร้างกิจกรรมในปฏิทินของวันพรุ่งนี้ เวลา 15.00-16.00 น. ระบุสถานที่ (Location) เป็น 'ห้องคอมพิวเตอร์' และตั้งค่าการแจ้งเตือน (Notification) ล่วงหน้า 2 ครั้ง คือ 1 วัน และ 30 นาที คัดลอกลิงก์แชร์กิจกรรมมาส่ง",
             "ชุดที่ 13: [Google Drive ทางลัด] สร้างไฟล์ Google Docs ชื่อ 'Original_Doc' ไว้ในโฟลเดอร์หลัก จากนั้นสร้างโฟลเดอร์ใหม่ชื่อ 'Shortcut_Folder' แล้วสร้าง 'ทางลัด (Shortcut)' ของไฟล์ Original_Doc ไปไว้ในโฟลเดอร์นั้น ส่งลิงก์ Shortcut_Folder แบบ Viewer",
             "ชุดที่ 14: [Google Slides Design] ให้สร้างสไลด์เนื้อหา 3 หน้า เกี่ยวกับ 'ภาวะโลกร้อน' ตกแต่งด้วยธีมเดียวกัน ใส่ภาพเคลื่อนไหว (Animation) ให้แต่ละองค์ประกอบ และเปลี่ยนหน้าแบบหมุนเวียน ส่งลิงก์แบบผู้มีสิทธิ์อ่าน",
+            "ชุดที่ 15: [Gmail Settings - ภาพถ่าย] เนื่องจากส่งลิงก์ Gmail ไม่ได้ ให้สร้างเอกสาร Docs แทรกภาพหน้าจอ (Screenshot) 2 ภาพ: 1) ภาพการตั้งค่าลายเซ็น (Signature) ท้ายอีเมลของตนเอง 2) ภาพการสร้างป้ายกำกับ (Label) แยกหมวดหมู่อีเมล ส่งลิงก์ไฟล์ Docs นี้",
             "ชุดที่ 16: [Google Docs ประวัติ] สร้างไฟล์ Docs พิมพ์ชื่อ-สกุลตนเอง จากนั้นแก้ไขสีข้อความและฟอนต์ 3 ครั้ง (เว้นระยะเวลาเล็กน้อย) ไปที่เมนู 'ประวัติเวอร์ชัน (Version history)' ตั้งชื่อเวอร์ชันสุดท้ายว่า 'Final_Version' ส่งลิงก์เอกสารให้ครูเป็น 'เอดิเตอร์'",
             "ชุดที่ 17: [Google Calendar Notes] เปิด Google Calendar สร้างนัดหมายชื่อ 'ประชุมโครงงาน' ในสัปดาห์หน้า จากนั้นกดปุ่ม 'สร้างบันทึกการประชุม (Create meeting notes)' ระบบจะสร้างไฟล์ Docs ให้อัตโนมัติ ให้เข้าไปพิมพ์หัวข้อการประชุมในไฟล์นั้น แล้วนำลิงก์ไฟล์ Docs มาส่ง",
             "ชุดที่ 18: [Google Docs สารบัญ] สร้างเอกสารรายงานที่มีหัวข้อหลัก (Heading 1) 3 หัวข้อ และหัวข้อย่อย (Heading 2) 3 หัวข้อ (กระจายอยู่ 2-3 หน้า) จากนั้นแทรก 'สารบัญ (Table of Contents)' ไว้ที่หน้าแรกสุดของเอกสาร ตั้งค่าแชร์แบบ Viewer แล้วส่งลิงก์",
@@ -196,25 +258,25 @@
             return shuffled;
         };
 
-        // ครูต้องนำ URL ของ Web App ที่ได้จาก Google Apps Script มาใส่ที่บรรทัดนี้
+        // ครูสามารถนำ URL ของ Web App จาก Google Apps Script มาใส่ที่นี่เพื่อจัดเก็บข้อมูล
         const scriptURL = 'https://script.google.com/macros/s/AKfycbx-XcaTNUPFCtTP_aaQXQqaKKNrzfwtI9lwXq0Sn8WqtVdsSNmbL0y_vHAKwa8jQP8/exec';
 
         const App = () => {
             const [step, setStep] = useState('login'); // login, exam, success
-            const [studentData, setStudentData] = useState({ name: '', number: '', room: '', password: '' });
+            const [studentData, setStudentData] = useState({ name: '', number: '', room: '', password: '', subject: 'google_edu' });
             const [errorMsg, setErrorMsg] = useState('');
             
-            // จัดการเรื่องรหัสผ่านจาก Google Sheet
+            // จัดการรหัสผ่านแยกตามห้อง
             const [passwords, setPasswords] = useState({});
             const [isLoadingConfig, setIsLoadingConfig] = useState(true);
 
-            // ข้อมูลการสอบ
+            // สถานะข้อมูลการสอบที่พร้อมสอบ
             const [examType, setExamType] = useState(''); // theory, practical
             const [mcqQuestions, setMcqQuestions] = useState([]);
             const [subjectiveQuestions, setSubjectiveQuestions] = useState([]);
             const [practicalQuestion, setPracticalQuestion] = useState('');
             
-            // คำตอบ
+            // สถานะการเก็บคำตอบ
             const [mcqAnswers, setMcqAnswers] = useState({});
             const [subjAnswers, setSubjAnswers] = useState({});
             const [practAnswer, setPractAnswer] = useState('');
@@ -223,11 +285,11 @@
             const theoryRooms = ['1', '4', '6', '7', '8', '9', '11'];
             const practicalRooms = ['2', '3', '5', '10'];
 
-            // โหลดรหัสผ่านจาก Google Sheet เมื่อเปิดเว็บ
+            // โหลดรหัสผ่านจาก Google Sheet เมื่อเปิดระบบ
             useEffect(() => {
                 const fetchPasswords = async () => {
                     if (scriptURL === 'YOUR_GOOGLE_SCRIPT_URL_HERE' || !scriptURL) {
-                        // จำลองรหัสผ่านหากยังไม่ได้ใส่ URL (รหัส 1234 ทุกห้อง)
+                        // จำลองรหัสผ่านหากไม่ได้ต่อ Google Sheet (ใช้ 1234 ทุกห้อง)
                         const mockPasswords = {};
                         [...theoryRooms, ...practicalRooms].forEach(room => mockPasswords[room] = '1234');
                         setPasswords(mockPasswords);
@@ -241,7 +303,10 @@
                         setPasswords(data);
                     } catch (error) {
                         console.error('Error fetching passwords:', error);
-                        setErrorMsg('ไม่สามารถดึงข้อมูลรหัสผ่านจากฐานข้อมูลได้ โปรดตรวจสอบ URL');
+                        // หากมีปัญหาการดึงข้อมูลจากเครือข่าย ให้ตั้งค่ารหัสเริ่มต้นเพื่อไม่ให้ระบบล็อก
+                        const mockPasswords = {};
+                        [...theoryRooms, ...practicalRooms].forEach(room => mockPasswords[room] = '1234');
+                        setPasswords(mockPasswords);
                     }
                     setIsLoadingConfig(false);
                 };
@@ -250,46 +315,65 @@
 
             const handleLoginSubmit = (e) => {
                 e.preventDefault();
-                if (!studentData.name || !studentData.number || !studentData.room || !studentData.password) {
-                    setErrorMsg('กรุณากรอกข้อมูลให้ครบถ้วน');
+                if (!studentData.name || !studentData.number || !studentData.room || !studentData.password || !studentData.subject) {
+                    setErrorMsg('กรุณากรอกข้อมูลและเลือกวิชาให้ครบถ้วน');
                     return;
                 }
                 
-                // ตรวจสอบรหัสผ่านจากที่ดึงมาจาก Sheet
+                // ตรวจสอบรหัสผ่านของห้องเรียน
                 const correctPassword = passwords[studentData.room];
                 if (!correctPassword) {
-                    setErrorMsg(`ไม่มีข้อมูลรหัสผ่านของ ม.6/${studentData.room} ในระบบฐานข้อมูล`);
+                    setErrorMsg(`ไม่มีข้อมูลรหัสผ่านของ ม.6/${studentData.room} ในฐานข้อมูล`);
                     return;
                 }
                 
                 if (studentData.password !== correctPassword.toString()) {
-                    setErrorMsg(`รหัสผ่านเข้าห้องสอบ ม.6/${studentData.room} ไม่ถูกต้อง`);
+                    setErrorMsg(`รหัสผ่านเข้าสอบห้อง ม.6/${studentData.room} ไม่ถูกต้อง`);
                     return;
                 }
 
                 setErrorMsg('');
                 
-                // จัดเตรียมข้อสอบตามห้อง
-                if (theoryRooms.includes(studentData.room)) {
+                // ==========================================
+                // จัดชุดข้อสอบสำหรับวิชาที่เลือก
+                // ==========================================
+                if (studentData.subject === 'google_edu') {
+                    // วิชา 1: Google for Education
+                    if (theoryRooms.includes(studentData.room)) {
+                        setExamType('theory');
+                        // สุ่มดึงปรนัย 30 ข้อ จากคลัง 100 ข้อ และสุ่มตัวเลือกในแต่ละข้อ
+                        const randomMcqs = shuffleArray(mcqPoolGoogle).slice(0, 30);
+                        const shuffledQs = randomMcqs.map(q => {
+                            const optionsWithIndex = q.options.map((opt, idx) => ({ text: opt, originalIndex: idx }));
+                            const shuffledOptions = shuffleArray(optionsWithIndex);
+                            return { ...q, options: shuffledOptions };
+                        });
+                        setMcqQuestions(shuffledQs);
+
+                        // สุ่มดึงอัตนัย 5 ข้อ จากคลัง 20 ข้อ
+                        const randomSubjectives = shuffleArray(subjectivePoolGoogle).slice(0, 5);
+                        setSubjectiveQuestions(randomSubjectives);
+                    } else if (practicalRooms.includes(studentData.room)) {
+                        setExamType('practical');
+                        // สุ่มโจทย์ปฏิบัติ 1 ข้อ
+                        const randomSet = practicalPool[Math.floor(Math.random() * practicalPool.length)];
+                        setPracticalQuestion(randomSet);
+                    }
+                } else if (studentData.subject === 'ai_critical') {
+                    // วิชา 2: AI และการคิดวิเคราะห์
+                    // ทุกห้องสอบทฤษฎีเดียวกัน: ปรนัยสุ่ม 40 ข้อ (จาก 40 ข้อ) + อัตนัยทั้งหมด 5 ข้อ
                     setExamType('theory');
                     
-                    // สุ่มดึงปรนัย 30 ข้อจากทั้งหมด 100 ข้อ
-                    const randomMcqs = shuffleArray(mcqPool).slice(0, 30);
-                    const shuffledQs = randomMcqs.map(q => {
+                    // สุ่มการเรียงลำดับและตัวเลือกของปรนัยทั้ง 40 ข้อ
+                    const shuffledAllMcqs = shuffleArray(mcqPoolAI).map(q => {
                         const optionsWithIndex = q.options.map((opt, idx) => ({ text: opt, originalIndex: idx }));
                         const shuffledOptions = shuffleArray(optionsWithIndex);
                         return { ...q, options: shuffledOptions };
                     });
-                    setMcqQuestions(shuffledQs);
+                    setMcqQuestions(shuffledAllMcqs);
 
-                    // สุ่มดึงอัตนัย 5 ข้อจากทั้งหมด 20 ข้อ
-                    const randomSubjectives = shuffleArray(subjectivePool).slice(0, 5);
-                    setSubjectiveQuestions(randomSubjectives);
-                } else if (practicalRooms.includes(studentData.room)) {
-                    setExamType('practical');
-                    // สุ่ม 1 ข้อจากคลังปฏิบัติ
-                    const randomSet = practicalPool[Math.floor(Math.random() * practicalPool.length)];
-                    setPracticalQuestion(randomSet);
+                    // ดึงข้อเขียนอัตนัยออกมาหมดทั้ง 5 ข้อตามเงื่อนไขคุณครู
+                    setSubjectiveQuestions(subjectivePoolAI);
                 }
 
                 setStep('exam');
@@ -299,7 +383,7 @@
                 setIsSubmitting(true);
                 let score = 0;
                 
-                // ตรวจคำตอบปรนัย
+                // คำนวณคะแนนปรนัยเบื้องต้น
                 if (examType === 'theory') {
                     mcqQuestions.forEach(q => {
                         if (mcqAnswers[q.id] === q.answer) score += 1;
@@ -310,8 +394,9 @@
                     name: studentData.name,
                     number: studentData.number,
                     room: studentData.room,
+                    subject: studentData.subject === 'google_edu' ? 'Google for Education' : 'AI และการคิดวิเคราะห์',
                     examType: examType,
-                    mcqScore: score, // ส่งคะแนนไปด้วยแต่ไม่บอกเด็ก
+                    mcqScore: score, 
                     mcqAnswers: JSON.stringify(mcqAnswers),
                     subjAnswers: JSON.stringify(subjAnswers),
                     practAnswer: practAnswer,
@@ -321,7 +406,6 @@
                 try {
                     console.log("Submitting payload:", payload);
                     
-                    // ส่งข้อมูลไป Google Sheet เมื่อใส่ URL แล้ว
                     if (scriptURL !== 'YOUR_GOOGLE_SCRIPT_URL_HERE') {
                         await fetch(scriptURL, {
                             method: 'POST',
@@ -331,12 +415,11 @@
                         });
                     }
                     
-                    // หน่วงเวลาเพื่อให้แน่ใจว่าบันทึกเสร็จสิ้น
                     await new Promise(r => setTimeout(r, 1500));
                     setStep('success');
                 } catch (error) {
-                    console.error('Error!', error.message);
-                    alert('เกิดข้อผิดพลาดในการส่งข้อสอบ โปรดแจ้งคุณครู');
+                    console.error('Error submitting exam:', error);
+                    alert('เกิดข้อผิดพลาดในการเชื่อมต่อเพื่อส่งข้อสอบ ค้างหน้านี้เก็บไว้และแจ้งคุณครูเพื่อตรวจสอบ');
                 }
                 setIsSubmitting(false);
             };
@@ -345,72 +428,121 @@
                 <div className="min-h-screen pb-12">
                     {/* Header */}
                     <div className="bg-google-blue text-white py-6 px-4 shadow-md">
-                        <div className="max-w-4xl mx-auto">
-                            <h1 className="text-2xl md:text-3xl font-bold">คอมพิวเตอร์ Google for Education ว30280</h1>
-                            <p className="mt-2 text-lg">ระดับชั้นมัธยมศึกษาปีที่ 6 | สอนโดย ครูกุลดา ดาวทอง</p>
+                        <div className="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <h1 className="text-2xl md:text-3xl font-bold">สอบกลางภาคชั้น ม.6</h1>
+                                <p className="mt-1 text-md md:text-lg opacity-90">โรงเรียนธาตุพนม | ผู้สอน: ครูกุลดา ดาวทอง</p>
+                            </div>
+                            <span className="bg-white/20 text-white px-3 py-1 rounded-full text-sm font-medium">
+                                มิดเทอม 2569
+                            </span>
                         </div>
                     </div>
 
                     <div className="max-w-4xl mx-auto mt-8 px-4">
                         {step === 'login' && (
-                            <div className="bg-white p-6 md:p-8 rounded-xl shadow-lg border-t-8 border-blue-500">
-                                <h2 className="text-2xl font-semibold mb-6">ข้อมูลผู้เข้าสอบ</h2>
+                            <div className="bg-white p-6 md:p-8 rounded-xl shadow-lg border-t-8 border-emerald-600">
+                                <h2 className="text-2xl font-semibold mb-6 text-gray-800 flex items-center gap-2">
+                                    <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                    ลงทะเบียนเข้าห้องสอบ
+                                </h2>
                                 <form onSubmit={handleLoginSubmit} className="space-y-5">
                                     <div>
-                                        <label className="block text-gray-700 font-medium mb-2">ชื่อ - นามสกุล</label>
-                                        <input type="text" required
-                                            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            value={studentData.name}
-                                            onChange={e => setStudentData({...studentData, name: e.target.value})}
-                                            placeholder="ด.ช./ด.ญ./นาย/นางสาว..."
-                                        />
+                                        <label className="block text-gray-700 font-medium mb-2">เลือกวิชาที่ต้องการสอบ</label>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <label className={`p-4 border-2 rounded-lg cursor-pointer transition flex items-center justify-between ${studentData.subject === 'google_edu' ? 'border-emerald-600 bg-emerald-50 text-emerald-900' : 'border-gray-200 hover:bg-gray-50 text-gray-700'}`}>
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-md">คอมพิวเตอร์ Google for Education</span>
+                                                    <span className="text-xs opacity-75">รหัสวิชา ว30280</span>
+                                                </div>
+                                                <input type="radio" name="subject" value="google_edu" 
+                                                    checked={studentData.subject === 'google_edu'}
+                                                    onChange={() => setStudentData({...studentData, subject: 'google_edu'})}
+                                                    className="w-4 h-4 text-emerald-600"
+                                                />
+                                            </label>
+                                            <label className={`p-4 border-2 rounded-lg cursor-pointer transition flex items-center justify-between ${studentData.subject === 'ai_critical' ? 'border-emerald-600 bg-emerald-50 text-emerald-900' : 'border-gray-200 hover:bg-gray-50 text-gray-700'}`}>
+                                                <div className="flex flex-col">
+                                                    <span className="font-bold text-md">AI และการคิดวิเคราะห์</span>
+                                                    <span className="text-xs opacity-75">ปรนัย 40 ข้อ + เขียนอัตนัย 5 ข้อ</span>
+                                                </div>
+                                                <input type="radio" name="subject" value="ai_critical" 
+                                                    checked={studentData.subject === 'ai_critical'}
+                                                    onChange={() => setStudentData({...studentData, subject: 'ai_critical'})}
+                                                    className="w-4 h-4 text-emerald-600"
+                                                />
+                                            </label>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label className="block text-gray-700 font-medium mb-2">เลขที่</label>
-                                        <input type="number" required min="1" max="50"
-                                            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            value={studentData.number}
-                                            onChange={e => setStudentData({...studentData, number: e.target.value})}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-gray-700 font-medium mb-2">ห้อง (ม.6/...)</label>
-                                        <select required
-                                            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            value={studentData.room}
-                                            onChange={e => setStudentData({...studentData, room: e.target.value})}
-                                        >
-                                            <option value="">-- เลือกห้องเรียน --</option>
-                                            <option value="1">ม.6/1</option>
-                                            <option value="2">ม.6/2</option>
-                                            <option value="3">ม.6/3</option>
-                                            <option value="4">ม.6/4</option>
-                                            <option value="5">ม.6/5</option>
-                                            <option value="6">ม.6/6</option>
-                                            <option value="7">ม.6/7</option>
-                                            <option value="8">ม.6/8</option>
-                                            <option value="9">ม.6/9</option>
-                                            <option value="10">ม.6/10</option>
-                                            <option value="11">ม.6/11</option>
-                                        </select>
-                                    </div>
-                                    {studentData.room && (
-                                        <div className="animate-fade-in">
-                                            <label className="block text-gray-700 font-medium mb-2">รหัสผ่านเข้าห้องสอบ (1234)</label>
-                                            <input type="password" required
-                                                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                value={studentData.password}
-                                                onChange={e => setStudentData({...studentData, password: e.target.value})}
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-gray-700 font-medium mb-2">ชื่อ - นามสกุล</label>
+                                            <input type="text" required
+                                                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                                value={studentData.name}
+                                                onChange={e => setStudentData({...studentData, name: e.target.value})}
+                                                placeholder="เด็กชาย / เด็กหญิง / นาย / นางสาว"
                                             />
+                                        </div>
+                                        <div>
+                                            <label className="block text-gray-700 font-medium mb-2">เลขที่</label>
+                                            <input type="number" required min="1" max="50"
+                                                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                                value={studentData.number}
+                                                onChange={e => setStudentData({...studentData, number: e.target.value})}
+                                                placeholder="ระบุเลขที่ของตนเอง"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-gray-700 font-medium mb-2">ระดับชั้นห้องเรียน</label>
+                                            <select required
+                                                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                                value={studentData.room}
+                                                onChange={e => setStudentData({...studentData, room: e.target.value})}
+                                            >
+                                                <option value="">-- เลือกห้องเรียน --</option>
+                                                <option value="1">ม.6/1</option>
+                                                <option value="2">ม.6/2</option>
+                                                <option value="3">ม.6/3</option>
+                                                <option value="4">ม.6/4</option>
+                                                <option value="5">ม.6/5</option>
+                                                <option value="6">ม.6/6</option>
+                                                <option value="7">ม.6/7</option>
+                                                <option value="8">ม.6/8</option>
+                                                <option value="9">ม.6/9</option>
+                                                <option value="10">ม.6/10</option>
+                                                <option value="11">ม.6/11</option>
+                                            </select>
+                                        </div>
+                                        {studentData.room && (
+                                            <div>
+                                                <label className="block text-gray-700 font-medium mb-2">รหัสผ่านเข้าสอบรายห้อง</label>
+                                                <input type="password" required
+                                                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                                    value={studentData.password}
+                                                    onChange={e => setStudentData({...studentData, password: e.target.value})}
+                                                    placeholder="กรอกรหัสผ่านจากครู"
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                    
+                                    {errorMsg && (
+                                        <div className="bg-red-50 text-red-700 p-3 rounded-md border border-red-200">
+                                            {errorMsg}
                                         </div>
                                     )}
                                     
-                                    {errorMsg && <p className="text-red-500 font-medium">{errorMsg}</p>}
-                                    
                                     <button type="submit" 
                                         disabled={isLoadingConfig}
-                                        className={`w-full text-white font-bold py-3 px-4 rounded-md transition duration-300 ${isLoadingConfig ? 'bg-gray-400 cursor-not-allowed' : 'bg-google-blue hover:bg-blue-700'}`}>
-                                        {isLoadingConfig ? 'กำลังเชื่อมต่อฐานข้อมูลรหัสผ่าน...' : 'เข้าสู่ห้องสอบ'}
+                                        className={`w-full text-white font-bold py-3 px-4 rounded-md transition duration-300 ${isLoadingConfig ? 'bg-gray-400 cursor-not-allowed' : 'bg-google-blue'}`}>
+                                        {isLoadingConfig ? 'กำลังโหลดฐานข้อมูลรหัสผ่าน...' : 'ยืนยันและเปิดข้อสอบ'}
                                     </button>
                                 </form>
                             </div>
@@ -418,37 +550,51 @@
 
                         {step === 'exam' && (
                             <div className="space-y-6">
-                                <div className="bg-white p-4 rounded-lg shadow border-l-4 border-yellow-400 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                                    <p className="font-semibold text-gray-700">ผู้สอบ: {studentData.name} | เลขที่: {studentData.number} | ห้อง: ม.6/{studentData.room}</p>
+                                {/* แถบข้อมูลนักเรียน */}
+                                <div className="bg-white p-4 rounded-lg shadow border-l-4 border-emerald-600 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                    <div>
+                                        <p className="font-semibold text-gray-800 text-md md:text-lg">
+                                            ผู้เข้าสอบ: {studentData.name} | เลขที่: {studentData.number} | ชั้น: ม.6/{studentData.room}
+                                        </p>
+                                        <p className="text-gray-500 text-sm font-medium mt-1">
+                                            รายวิชา: {studentData.subject === 'google_edu' ? 'คอมพิวเตอร์ Google for Education' : 'AI และการคิดวิเคราะห์'}
+                                        </p>
+                                    </div>
                                     <button 
                                         onClick={() => {
-                                            if(window.confirm('คุณต้องการย้อนกลับไปแก้ไขข้อมูลส่วนตัวใช่หรือไม่? (คำตอบที่ทำไว้จะยังคงอยู่)')) {
+                                            if(window.confirm('คำตอบของคุณทั้งหมดจะยังไม่หายไป คุณแน่ใจที่จะย้อนกลับไปแก้ไขข้อมูลส่วนตัวใช่หรือไม่')) {
                                                 setStep('login');
                                             }
                                         }}
-                                        className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-md transition text-sm"
+                                        className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-1.5 px-4 rounded transition text-sm"
                                     >
-                                        ย้อนกลับไปแก้ไขข้อมูล
+                                        ย้อนกลับหน้าลงชื่อ
                                     </button>
                                 </div>
 
+                                {/* กรณีทำข้อสอบทฤษฎี (แบบเลือกตอบ + เขียนตอบ) */}
                                 {examType === 'theory' && (
                                     <>
-                                        <div className="bg-white p-6 rounded-xl shadow-lg border-t-8 border-purple-500">
-                                            <h2 className="text-xl font-bold mb-4 text-purple-700">ตอนที่ 1: ปรนัย 4 ตัวเลือก </h2>
+                                        {/* ปรนัย */}
+                                        <div className="bg-white p-6 rounded-xl shadow-lg border-t-8 border-purple-600">
+                                            <h2 className="text-xl font-bold mb-2 text-purple-700">
+                                                ตอนที่ 1: ปรนัย 4 ตัวเลือก ({studentData.subject === 'google_edu' ? 'สุ่มดึง 30 ข้อ' : 'สุ่มดึงและจัดหน้า 40 ข้อ'})
+                                            </h2>
+                                            <p className="text-gray-500 text-sm mb-6">คลิกเลือกคำตอบที่ถูกต้องที่สุดเพียงข้อเดียวจากหน้าข้อสอบต่อไปนี้</p>
+                                            
                                             {mcqQuestions.map((q, index) => (
-                                                <div key={q.id} className="mb-6 pb-6 border-b last:border-0">
-                                                    <p className="font-medium text-lg mb-3">{index + 1}. {q.q}</p>
-                                                    <div className="space-y-2">
+                                                <div key={q.id} className="mb-6 pb-6 border-b border-gray-100 last:border-0">
+                                                    <p className="font-medium text-lg mb-3 text-gray-900">{index + 1}. {q.q}</p>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                                                         {q.options.map((opt, optIdx) => (
-                                                            <label key={optIdx} className="flex items-center space-x-3 p-3 border rounded-md hover:bg-gray-50 cursor-pointer">
+                                                            <label key={optIdx} className="flex items-center space-x-3 p-3.5 border rounded-lg hover:bg-gray-50 cursor-pointer transition">
                                                                 <input type="radio" 
                                                                     name={`q_${q.id}`} 
                                                                     value={opt.originalIndex}
                                                                     onChange={() => setMcqAnswers({...mcqAnswers, [q.id]: opt.originalIndex})}
-                                                                    className="w-4 h-4 text-blue-600"
+                                                                    className="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
                                                                 />
-                                                                <span>{opt.text}</span>
+                                                                <span className="text-gray-700">{opt.text}</span>
                                                             </label>
                                                         ))}
                                                     </div>
@@ -456,15 +602,20 @@
                                             ))}
                                         </div>
                                         
-                                        <div className="bg-white p-6 rounded-xl shadow-lg border-t-8 border-green-500">
-                                            <h2 className="text-xl font-bold mb-4 text-green-700">ตอนที่ 2: อัตนัย </h2>
+                                        {/* อัตนัย */}
+                                        <div className="bg-white p-6 rounded-xl shadow-lg border-t-8 border-indigo-600">
+                                            <h2 className="text-xl font-bold mb-2 text-indigo-700">
+                                                ตอนที่ 2: อัตนัย ({studentData.subject === 'google_edu' ? 'สุ่มทำ 5 ข้อ' : 'ข้อเขียนวิเคราะห์ ทั้งหมด 5 ข้อ'})
+                                            </h2>
+                                            <p className="text-gray-500 text-sm mb-6">กรุณาพิมพ์เขียนอธิบายตอบคำถามด้วยการวิเคราะห์เชิงวิชาการให้สมเหตุสมผล</p>
+                                            
                                             {subjectiveQuestions.map((q, index) => (
                                                 <div key={index} className="mb-6">
-                                                    <p className="font-medium text-lg mb-2">{q}</p>
+                                                    <p className="font-semibold text-lg text-gray-900 mb-3 leading-relaxed">{q}</p>
                                                     <textarea 
-                                                        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                                                        rows="3"
-                                                        placeholder="พิมพ์คำตอบของคุณที่นี่..."
+                                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800"
+                                                        rows="4"
+                                                        placeholder="พิมพ์คำตอบของคุณและอธิบายให้ละเอียดพร้อมตัวอย่างลงในช่องว่างนี้..."
                                                         onChange={(e) => setSubjAnswers({...subjAnswers, [index]: e.target.value})}
                                                     ></textarea>
                                                 </div>
@@ -473,18 +624,21 @@
                                     </>
                                 )}
 
+                                {/* กรณีทำข้อสอบปฏิบัติ (เฉพาะคอมพิวเตอร์ Google for Education) */}
                                 {examType === 'practical' && (
                                     <div className="bg-white p-6 rounded-xl shadow-lg border-t-8 border-pink-500">
-                                        <h2 className="text-xl font-bold mb-4 text-pink-700">ข้อสอบปฏิบัติ</h2>
+                                        <h2 className="text-xl font-bold mb-2 text-pink-700">ข้อสอบปฏิบัติ</h2>
+                                        <p className="text-gray-500 text-sm mb-6">โปรดเปิดหน้าโปรแกรม Google หรือบริการที่โจทย์ระบุเพื่อทำผลงานตามรายละเอียดแล้วนำลิงก์ผลงานมาส่ง</p>
+                                        
                                         <div className="bg-pink-50 p-4 rounded-md mb-6 border border-pink-200">
-                                            <p className="text-lg font-semibold mb-2">คำชี้แจง:</p>
+                                            <p className="text-lg font-bold mb-2 text-pink-900">คำชี้แจงการสอบ:</p>
                                             <p className="text-gray-800 text-lg leading-relaxed">{practicalQuestion}</p>
                                         </div>
                                         <div>
-                                            <label className="block text-gray-700 font-medium mb-2">วางลิงก์ผลงานของคุณที่นี่ (URL)</label>
+                                            <label className="block text-gray-700 font-medium mb-2">ลิงก์ส่งงาน (เช่น Google Drive Folder URL หรือ Google Docs Share Link)</label>
                                             <input type="url" 
-                                                className="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-lg"
-                                                placeholder="https://docs.google.com/..."
+                                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-md"
+                                                placeholder="วางลิงก์ความยาวเต็มรูปแบบของคุณที่นี่..."
                                                 value={practAnswer}
                                                 onChange={e => setPractAnswer(e.target.value)}
                                             />
@@ -492,17 +646,18 @@
                                     </div>
                                 )}
 
+                                {/* ปุ่มส่งข้อสอบ */}
                                 <div className="flex justify-end mt-8">
                                     <button 
                                         onClick={() => {
-                                            if(window.confirm('คุณตรวจสอบคำตอบเรียบร้อยแล้วและต้องการส่งข้อสอบใช่หรือไม่?')) {
+                                            if(window.confirm('คุณตรวจสอบความเรียบร้อยและต้องการกดยืนยันการส่งกระดาษคำตอบใช่หรือไม่')) {
                                                 submitExam();
                                             }
                                         }}
                                         disabled={isSubmitting}
-                                        className={`px-8 py-3 rounded-lg text-white font-bold text-lg shadow-lg ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-google-blue hover:bg-blue-700 transition'}`}
+                                        className={`px-8 py-4 rounded-lg text-white font-bold text-lg shadow-md transition ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-google-blue'}`}
                                     >
-                                        {isSubmitting ? 'กำลังบันทึกข้อมูล...' : 'ส่งข้อสอบ'}
+                                        {isSubmitting ? 'กำลังบันทึกกระดาษคำตอบเข้าสู่คลาวด์...' : 'ส่งกระดาษคำตอบ'}
                                     </button>
                                 </div>
                             </div>
@@ -514,20 +669,20 @@
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                                 <h2 className="text-3xl font-bold text-gray-800 mb-4">ส่งข้อสอบเรียบร้อยแล้ว</h2>
-                                <p className="text-lg text-gray-600 mb-6">ระบบได้บันทึกคำตอบและคำนวณคะแนนของคุณลงในฐานข้อมูลเรียบร้อยแล้ว</p>
-                                <p className="text-md text-gray-500 mb-8"> {studentData.name} <br/>ขอให้โชคดีกับการสอบค่ะ</p>
+                                <p className="text-lg text-gray-600 mb-6">ระบบได้บันทึกคำตอบของ {studentData.name} ลงในฐานข้อมูลของครูกุลดาเป็นที่เรียบร้อยแล้ว</p>
+                                <p className="text-md text-gray-500 mb-8">ขอให้โชคดีกับคะแนนสอบ</p>
                                 
                                 <button 
                                     onClick={() => {
-                                        setStudentData({ name: '', number: '', room: '', password: '' });
+                                        setStudentData({ name: '', number: '', room: '', password: '', subject: 'google_edu' });
                                         setMcqAnswers({});
                                         setSubjAnswers({});
                                         setPractAnswer('');
                                         setStep('login');
                                     }}
-                                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-6 rounded-md transition"
+                                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2.5 px-6 rounded-md transition"
                                 >
-                                    กลับหน้าแรก 
+                                    กลับหน้าแรก (สำหรับนักเรียนคนต่อไป)
                                 </button>
                             </div>
                         )}
